@@ -33,7 +33,7 @@ struct pcb_t* proc_init(){
     return rootPCB;
 }
 
-struct pcb_t* proc_alloc(pcb_t* p_parent){
+struct pcb_t* proc_alloc(struct pcb_t* p_parent){
     //the result
     struct pcb_t* newPCB = NULL;
     //if parent is not NULL and there is a free pcb
@@ -53,7 +53,7 @@ struct pcb_t* proc_alloc(pcb_t* p_parent){
     return newPCB;
 }
 
-int proc_delete(pcb_t* oldproc){
+int proc_delete(struct pcb_t* oldproc){
     //the result code (default: error)
     int result = -1;
     //if the process has no children or threads
@@ -71,7 +71,7 @@ int proc_delete(pcb_t* oldproc){
     return result;
 }
 
-struct pcb_t* proc_firstchild(pcb_t* proc){
+struct pcb_t* proc_firstchild(struct pcb_t* proc){
     //the first child
     pcb_t* firstChild = NULL;
     //if the list is not empty
@@ -83,7 +83,7 @@ struct pcb_t* proc_firstchild(pcb_t* proc){
     return firstChild;
 }
 
-struct tcb_t* proc_firstthread(pcb_t* proc){
+struct tcb_t* proc_firstthread(struct pcb_t* proc){
     //the first thread
     tcb_t* firstThread = NULL;
     //if the list is not empty
