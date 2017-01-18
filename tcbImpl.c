@@ -69,23 +69,34 @@ struct tcb_t* extractTCB(){
 }
 
 void thread_enqueue(struct tcb_t *new, struct list_head *queue) {
+    //append the given element to the list
     list_add_tail(&(new->t_sched),queue);
 }
 
 struct tcb_t *thread_qhead(struct list_head *queue) {
+    //declare a variable for result value, default value is null
     struct tcb_t * result = NULL;
+    //if the list is not empty
     if (!list_empty(queue)) {
+        //get the first element of the queue
         result = container_of(list_next(queue),tcb_t,t_sched);
     }
+    //return the thread
     return result;
 }
 
 struct tcb_t *thread_dequeue(struct list_head *queue) {
+    //declare a variable for result value,default value is null
     struct tcb_t* result = NULL;
+    //if the list is not empty
     if (!list_empty(queue)) {
+        //get the first element of the queue
         struct list_head * first = list_next(queue);
+        //set it as return value
         result = container_of(first,tcb_t,t_sched);
+        //delete the first thread of the queue
         list_del(first);
     }
+    //return the dequeued thread
     return result;
 }
