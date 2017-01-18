@@ -57,7 +57,7 @@ int proc_delete(pcb_t* oldproc){
     //the result code (default: error)
     int result = -1;
     //if the process has no children or threads
-    if(list_empty(oldproc->p_children) && list_empty(oldproc->p_threads)){
+    if(list_empty(&(oldproc->p_children)) && list_empty(oldproc->p_threads)){
         //remove oldproc from the parent's children list
         list_del(oldproc->p_siblings);
         //erase parent link (not necessary)
@@ -75,7 +75,7 @@ struct pcb_t* proc_firstchild(pcb_t* proc){
     //the first child
     pcb_t* firstChild = NULL;
     //if the list is not empty
-    if(!list_empty(proc->p_children)){
+    if(!list_empty(&(proc->p_children))){
         //extract a pcb from the first children list element
         firstChild = container_of(list_next(&(proc->p_children)), pcb_t, p_children);
     }
@@ -87,7 +87,7 @@ struct tcb_t* proc_firstthread(pcb_t* proc){
     //the first thread
     tcb_t* firstThread = NULL;
     //if the list is not empty
-    if(list_empty(proc->p_threads)){
+    if(list_empty(&(proc->p_threads))){
         //extract a tcb from the first thread list element
         firstThread = container_of(list_next(&(proc->p_threads)), tcb_t, p_threads);
     }
