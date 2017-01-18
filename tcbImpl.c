@@ -12,11 +12,11 @@ struct list_head freeTCB;
 
 void thread_init(){
     //if invalid const exit
-    if (MAXTHREAD == 0) exit();
+    if (MAXTHREAD <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freeTCB);
     //for the whole array of tcbs
-    for (int i = 0;  < MAXTHREAD; i++) {
+    for (int i = 0; i < MAXTHREAD; i++) {
         //add the tcb to the free list
         list_add(&(tcbArray[i].t_next), &freeTCB);
     }

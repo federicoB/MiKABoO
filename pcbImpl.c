@@ -12,11 +12,11 @@ struct list_head freePCB;
 
 struct pcb_t* proc_init(){
     //if invalid const exit
-    if (MAXPROC == 0) exit();//TODO: 
+    if (MAXPROC <= 0) exit(); 
     //init the free list
     INIT_LIST_HEAD(&freePCB);
     //for the whole array of pcbs
-    for (int i = 0;  < MAXPROC; i++) {
+    for (int i = 0; i < MAXPROC; i++) {
         //add the pcb to the free list
         list_add(&(tcbArray[i].p_siblings), &freePCB);
     }
