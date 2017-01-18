@@ -2,43 +2,69 @@
 #include "listx.h";
 #include "const.h";
 
-struct tcb_t tcbArray [MAXTHREAD];
-struct list_head freeTCB;
-
+/* extracts a tcb from the free tcb list. Must check size first. */
 struct tcb_t* extractTCB();
 
+//the array of tcbs
+struct tcb_t tcbArray[MAXTHREAD];
+//tcb free list entry point
+struct list_head freeTCB;
+
 void thread_init(){
+    //if invalid const exit
     if (MAXTHREAD == 0) exit();
+    //init the free list
     INIT_LIST_HEAD(&freeTCB);
-    for (int i = 0; < MAXTHREAD; i++){
+    //for the whole array of tcbs
+    for (int i = 0;  < MAXTHREAD; i++) {
+        //add the tcb to the free list
         list_add(&(tcbArray[i].t_next), &freeTCB);
     }
 }
 
-struct tcb_t *thread_alloc(struct pcb_t *process){
+struct tcb_t* thread_alloc(struct pcb_t* process){
+    //the result
     struct tcb_t* newTCB = NULL;
-    if(process !=NULL && !list_empty(&freeTCB)){
+    //if parent is not NULL and there is a free pcb
+    if (process != NULL && !list_empty(&freeTCB)){
+        //extract a tcb
         newTCB = extractTCB();
+        //init message list in new pcb
         INIT_LIST_HEAD(&(newTCB->t_msgq));
+        //insert the new tcb in the thread list of the process
         list_add(&(newTCB->t_next), &(process->p_threads));
+        //TODO: choose how to init t_next and t_sched ---------------------
+        //TODO: choose how toinit status ecc...
+        //save the parent process
         newTCB->t_pcb = process;
-    }
+    }//else leave as NULL
+    //return the result
     return newTCB;
 }
 
-int thread_free(struct tcb_t * oldthread){
+int thread_free(struct tcb_t* oldthread){
+    //the result code (default: error)
     int result = -1;
+    //if the thread has no pending message
     if(list_empty(&(oldthread->t_msgq))){
-        list_del(&(oldthread->t_next));
-        list_add(&(oldthread->t_next), &(freeTCB));
+        //remove oldthread from the process's thread list
+        list_del(oldthread->t_next);
+        //add oldthread to the free list
+        list_add(&(oldthread->t_next), &freeTCB);
+        //set result as 0 (success)
         result = 0;
     }
+    //return the result
     return result;
 }
 
+
 struct tcb_t* extractTCB(){
+    //extract a tcb from the first list element
     struct tcb_t* extractedTCB = container_of(list_next(&freeTCB), tcb_t, t_next);
+    //remove the extracted tcb from the free list
     list_del(&(extractedTCB->t_next));
+    //return the tcb
     return extractedTCB;
 }
 
