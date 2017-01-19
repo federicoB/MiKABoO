@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "mikabooq.h"
 #include "const.h"
 #include "listx.h"
@@ -12,7 +13,8 @@ struct list_head freeMSG;
 
 void msgq_init(void){
     //if invalid const exit
-    if(MAXMSG <= 0) exit();
+    //TODO check if exit can used with uarm or substitute with something similar supported
+    //if(MAXMSG <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freeMSG);
     //for the whole array of messages
@@ -53,13 +55,13 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
         //if sender is null (select any message)
         if(sender == NULL){
             //get the first message
-            selectedMSG = container_of(list_next(&(destination->t_msgq)), msg_t, m_next);
+            selectedMSG = container_of(list_next(&(destination->t_msgq)),struct msg_t, m_next);
         }
         //else if sender is not null but *sender is null (pointer to a null nointer)
         //(select any message and save the message sender)
         else if(sender != NULL && *sender == NULL){
             //get the first message
-            selectedMSG = container_of(list_next(&(destination->t_msgq)), msg_t, m_next);
+            selectedMSG = container_of(list_next(&(destination->t_msgq)),struct msg_t, m_next);
             //save the message sender
             *sender = selectedMSG->m_sender;
         }
@@ -98,7 +100,7 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
 
 struct msg_t* extractMSG(){
     //extract a message from the first list element
-    struct msg_t* extractedMSG = container_of(list_next(&freeMSG), msg_t, m_next);
+    struct msg_t* extractedMSG = container_of(list_next(&freeMSG),struct msg_t, m_next);
     //remove the extracted message from the free list
     list_del(&(extractedMSG->m_next));	
     //return the message

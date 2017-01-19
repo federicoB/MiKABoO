@@ -1,3 +1,5 @@
+#define UARM_MACHINE_COMPILING = 1
+
 #include "mikabooq.h"
 #include "listx.h"
 #include "const.h"
@@ -12,7 +14,8 @@ struct list_head freeTCB;
 
 void thread_init(){
     //if invalid const exit
-    if (MAXTHREAD <= 0) exit();
+    //TODO check if exit can used with uarm or substitute with something similar supported
+    //if (MAXTHREAD <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freeTCB);
     //for the whole array of tcbs
@@ -48,7 +51,7 @@ int thread_free(struct tcb_t* oldthread){
     //if the thread has no pending message
     if(list_empty(&(oldthread->t_msgq))){
         //remove oldthread from the process's thread list
-        list_del(oldthread->t_next);
+        list_del(&(oldthread->t_next));
         //add oldthread to the free list
         list_add(&(oldthread->t_next), &freeTCB);
         //set result as 0 (success)
@@ -61,7 +64,7 @@ int thread_free(struct tcb_t* oldthread){
 
 struct tcb_t* extractTCB(){
     //extract a tcb from the first list element
-    struct tcb_t* extractedTCB = container_of(list_next(&freeTCB), tcb_t, t_next);
+    struct tcb_t* extractedTCB = container_of(list_next(&freeTCB), struct tcb_t, t_next);
     //remove the extracted tcb from the free list
     list_del(&(extractedTCB->t_next));
     //return the tcb
@@ -79,7 +82,7 @@ struct tcb_t *thread_qhead(struct list_head *queue) {
     //if the list is not empty
     if (!list_empty(queue)) {
         //get the first element of the queue
-        result = container_of(list_next(queue),tcb_t,t_sched);
+        result = container_of(list_next(queue),struct tcb_t,t_sched);
     }
     //return the thread
     return result;
@@ -93,7 +96,7 @@ struct tcb_t *thread_dequeue(struct list_head *queue) {
         //get the first element of the queue
         struct list_head * first = list_next(queue);
         //set it as return value
-        result = container_of(first,tcb_t,t_sched);
+        result = container_of(first,struct tcb_t,t_sched);
         //delete the first thread of the queue
         list_del(first);
     }

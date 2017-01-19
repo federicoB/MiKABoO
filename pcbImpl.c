@@ -12,7 +12,8 @@ struct list_head freePCB;
 
 struct pcb_t* proc_init(){
     //if invalid const exit
-    if (MAXPROC <= 0) exit(); 
+    //TODO check if exit can used with uarm or substitute with something similar supported
+    //if (MAXPROC <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freePCB);
     //for the whole array of pcbs
@@ -57,9 +58,9 @@ int proc_delete(struct pcb_t* oldproc){
     //the result code (default: error)
     int result = -1;
     //if the process has no children or threads
-    if(list_empty(&(oldproc->p_children)) && list_empty(oldproc->p_threads)){
+    if(list_empty(&(oldproc->p_children)) && list_empty(&(oldproc->p_threads))){
         //remove oldproc from the parent's children list
-        list_del(oldproc->p_siblings);
+        list_del(&(oldproc->p_siblings));
         //erase parent link (not necessary)
         oldproc->p_parent = NULL;
         //add oldproc to the free list
@@ -73,11 +74,11 @@ int proc_delete(struct pcb_t* oldproc){
 
 struct pcb_t* proc_firstchild(struct pcb_t* proc){
     //the first child
-    pcb_t* firstChild = NULL;
+    struct pcb_t* firstChild = NULL;
     //if the list is not empty
     if(!list_empty(&(proc->p_children))){
         //extract a pcb from the first children list element
-        firstChild = container_of(list_next(&(proc->p_children)), pcb_t, p_children);
+        firstChild = container_of(list_next(&(proc->p_children)),struct pcb_t, p_children);
     }
     //return the first child
     return firstChild;
@@ -85,11 +86,11 @@ struct pcb_t* proc_firstchild(struct pcb_t* proc){
 
 struct tcb_t* proc_firstthread(struct pcb_t* proc){
     //the first thread
-    tcb_t* firstThread = NULL;
+    struct tcb_t* firstThread = NULL;
     //if the list is not empty
     if(list_empty(&(proc->p_threads))){
         //extract a tcb from the first thread list element
-        firstThread = container_of(list_next(&(proc->p_threads)), tcb_t, p_threads);
+        firstThread = container_of(list_next(&(proc->p_threads)),struct tcb_t, p_threads);
     }
     //return the first thread
     return firstThread;
@@ -97,7 +98,7 @@ struct tcb_t* proc_firstthread(struct pcb_t* proc){
 
 struct pcb_t* extractPCB(){
     //extract a pcb from the first list element
-    struct pcb_t* extractedPCB = container_of(list_next(&freePCB), pcb_t, p_siblings);
+    struct pcb_t* extractedPCB = container_of(list_next(&freePCB),struct pcb_t, p_siblings);
     //remove the extracted pcb from the free list
     list_del(&(extractedPCB->p_siblings));
     //return the pcb
