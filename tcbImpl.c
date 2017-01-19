@@ -1,6 +1,6 @@
-#include "mikabooq.h";
-#include "listx.h";
-#include "const.h";
+#include "mikabooq.h"
+#include "listx.h"
+#include "const.h"
 
 /* extracts a tcb from the free tcb list. Must check size first. */
 struct tcb_t* extractTCB();
