@@ -1,6 +1,6 @@
 #include "mikabooq.h"
-#include "const.h";
-#include "listx.h";
+#include "const.h"
+#include "listx.h"
 
 /* extracts a pcb from the free pcb list. Must check size first. */
 struct pcb_t* extractPCB();
@@ -16,8 +16,10 @@ struct pcb_t* proc_init(){
     //if (MAXPROC <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freePCB);
+    //declare index
+    int i;
     //for the whole array of pcbs
-    for (int i = 0; i < MAXPROC; i++) {
+    for (i = 0; i < MAXPROC; i++) {
         //add the pcb to the free list
         list_add(&(tcbArray[i].p_siblings), &freePCB);
     }
@@ -90,7 +92,7 @@ struct tcb_t* proc_firstthread(struct pcb_t* proc){
     //if the list is not empty
     if(list_empty(&(proc->p_threads))){
         //extract a tcb from the first thread list element
-        firstThread = container_of(list_next(&(proc->p_threads)),struct tcb_t, p_threads);
+        firstThread = container_of(list_next(&(proc->p_threads)),struct tcb_t, t_next);
     }
     //return the first thread
     return firstThread;

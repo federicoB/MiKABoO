@@ -1,5 +1,4 @@
-INCLUDE_HEADER_OPTION = -I/usr/include/uarm -I$(CURDIR) -include stdint.h
-GCC_OPTIONS = -std=c11
+PREPROCESSOR_OPTIONS = -D UARM_MACHINE_COMPILING=1 -I/usr/include/uarm -I$(CURDIR) -include stdint.h
  
 all: test1
 
@@ -7,13 +6,13 @@ test1: tcbImpl.o pcbImpl.o msgqImpl.o p1test.o
 	arm-none-eabi-ld -T /usr/include/uarm/ldscripts/elf32ltsarm.h.uarmcore.x -o test1 /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o tcbImpl.o pcbImpl.o msgqImpl.o p1test.o 
 	
 tcbImpl.o: 
-	arm-none-eabi-gcc -mcpu=arm7tdmi $(GCC_OPTIONS) -c $(INCLUDE_HEADER_OPTION) -o tcbImpl.o tcbImpl.c
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o tcbImpl.o tcbImpl.c
 	
 pcbImpl.o: 
-	arm-none-eabi-gcc -mcpu=arm7tdmi $(GCC_OPTIONS) -c $(INCLUDE_HEADER_OPTION) -o pcbImpl.o pcbImpl.c
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o pcbImpl.o pcbImpl.c
 
 msgqImpl.o: 
-	arm-none-eabi-gcc -mcpu=arm7tdmi $(GCC_OPTIONS) -c $(INCLUDE_HEADER_OPTION) -o msgqImpl.o msgqImpl.c
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o msgqImpl.o msgqImpl.c
 	
 p1test.o: 
-	arm-none-eabi-gcc -mcpu=arm7tdmi $(GCC_OPTIONS) -c $(INCLUDE_HEADER_OPTION) -o p1test.o p1test.c
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o p1test.o p1test.c

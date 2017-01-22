@@ -1,5 +1,3 @@
-#define UARM_MACHINE_COMPILING = 1
-
 #include "mikabooq.h"
 #include "listx.h"
 #include "const.h"
@@ -18,8 +16,10 @@ void thread_init(){
     //if (MAXTHREAD <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freeTCB);
+    //declare index
+    int i;
     //for the whole array of tcbs
-    for (int i = 0; i < MAXTHREAD; i++) {
+    for (i = 0; i < MAXTHREAD; i++) {
         //add the tcb to the free list
         list_add(&(tcbArray[i].t_next), &freeTCB);
     }

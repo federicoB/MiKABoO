@@ -17,8 +17,10 @@ void msgq_init(void){
     //if(MAXMSG <= 0) exit();
     //init the free list
     INIT_LIST_HEAD(&freeMSG);
+    //declare index
+    int i;
     //for the whole array of messages
-    for(int i = 0; i < MAXMSG;i++){
+    for(i = 0; i < MAXMSG;i++){
         //add the message to the free list
         list_add(&(msgArray[i].m_next), &freeMSG);
     }
