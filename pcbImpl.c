@@ -6,7 +6,7 @@
 struct pcb_t* extractPCB();
 
 //the array of pcbs
-struct pcb_t tcbArray[MAXPROC];
+struct pcb_t pcbArray[MAXPROC];
 //pcb free list entry point
 struct list_head freePCB;
 
@@ -21,7 +21,7 @@ struct pcb_t* proc_init(){
     //for the whole array of pcbs
     for (i = 0; i < MAXPROC; i++) {
         //add the pcb to the free list
-        list_add(&(tcbArray[i].p_siblings), &freePCB);
+        list_add(&(pcbArray[i].p_siblings), &freePCB);
     }
     //extract the a pcb from the free list
     struct pcb_t* rootPCB = extractPCB();
