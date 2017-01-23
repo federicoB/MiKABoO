@@ -80,7 +80,7 @@ struct pcb_t* proc_firstchild(struct pcb_t* proc){
     //if the list is not empty
     if(!list_empty(&(proc->p_children))){
         //extract a pcb from the first children list element
-        firstChild = container_of(list_next(&(proc->p_children)),struct pcb_t, p_children);
+        firstChild = container_of(list_next(&(proc->p_children)),struct pcb_t, p_siblings);
     }
     //return the first child
     return firstChild;
@@ -90,7 +90,7 @@ struct tcb_t* proc_firstthread(struct pcb_t* proc){
     //the first thread
     struct tcb_t* firstThread = NULL;
     //if the list is not empty
-    if(list_empty(&(proc->p_threads))){
+    if(!list_empty(&(proc->p_threads))){
         //extract a tcb from the first thread list element
         firstThread = container_of(list_next(&(proc->p_threads)),struct tcb_t, t_next);
     }
