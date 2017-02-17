@@ -1,5 +1,5 @@
 /* subset of the Linux Kernel source file: "include/linux/list.h"
-CPLv2 */
+GPLv2 */
 #ifndef _LISTX_H
 #define _LISTX_H
 
