@@ -1,13 +1,15 @@
 PREPROCESSOR_OPTIONS = -D UARM_MACHINE_COMPILING=1 -I/usr/include/uarm -I$(CURDIR) -include stdint.h
 BUILD_DIR = build
 DIST_DIR = dist
+UARM_OBJECT_FILES = /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o
+OBJECT_FILES = $(UARM_OBJECT_FILES) $(BUILD_DIR)/tcbImpl.o $(BUILD_DIR)/pcbImpl.o $(BUILD_DIR)/msgqImpl.o $(BUILD_DIR)/p1test.o
 DEBUG_FLAGS = -g
  
 all: $(DIST_DIR)/test1
 
-$(DIST_DIR)/test1: $(BUILD_DIR)/tcbImpl.o $(BUILD_DIR)/pcbImpl.o $(BUILD_DIR)/msgqImpl.o $(BUILD_DIR)/p1test.o
+$(DIST_DIR)/test1: $(OBJECT_FILES)
 	mkdir -p $(DIST_DIR)
-	arm-none-eabi-ld -T /usr/include/uarm/ldscripts/elf32ltsarm.h.uarmcore.x -o $(DIST_DIR)/test1 /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o $(BUILD_DIR)/tcbImpl.o $(BUILD_DIR)/pcbImpl.o $(BUILD_DIR)/msgqImpl.o $(BUILD_DIR)/p1test.o
+	arm-none-eabi-ld -T /usr/include/uarm/ldscripts/elf32ltsarm.h.uarmcore.x -o $(DIST_DIR)/test1 $(OBJECT_FILES)
 	
 $(BUILD_DIR)/tcbImpl.o: tcbImpl.c mikabooq.h const.h listx.h
 	mkdir -p $(BUILD_DIR)
