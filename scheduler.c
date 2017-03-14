@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "scheduler.h"
 
 
@@ -28,7 +29,7 @@ struct tcb_t* sched_dequeue(struct list_head* sched_queue){
 
 struct tcb_t* sched_top(struct list_head* sched_queue){
     //the top of the queue
-    tcb_t* result = NULL;
+    struct tcb_t* result = NULL;
     //if the queue is not empty
     if(list_empty(sched_queue)){
         //get the top
