@@ -31,9 +31,9 @@ struct tcb_t* sched_top(struct list_head* sched_queue){
     //the top of the queue
     struct tcb_t* result = NULL;
     //if the queue is not empty
-    if(list_empty(sched_queue)){
+    if(!list_empty(sched_queue)){
         //get the top
-        result = container_of(list_next(sched_queue),struct tcb_t, t_sched);
+        result = container_of(list_next(sched_queue), struct tcb_t, t_sched);
     }
     //return the result (or null)
     return result;
