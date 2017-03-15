@@ -6,6 +6,22 @@
 //declare an extern test function
 extern void test();
 
+
+void setHandler(memaddress newArea, memaddress handler){
+    //cast the given area address as a pointer to state_t
+    state_t* newAreaP = (state_t *) newArea;
+    //init the area with the current state
+    STST(newAreaP);
+    //set the program counter as the address of the handler
+    newAreaP->pc = handler;
+    //set the stack pointer as the ram top
+    newAreaP->sp = RAM_TOP;
+    //set all interrupts as masked and set kernel mode
+    newAreaP->cpsr = STATUS_ALL_INT_DISABLE((newAreaP->cpsr) | STATUS_SYS_MODE);
+    //disable VM
+    newAreaP->CP15_Control = CP15_DISABLE_VM(newAreaP->CP15_Control);
+}
+
 int main(int argc, char* * argv[]) {
     //get root process
     struct pcb_t* rootPCB = proc_init();
