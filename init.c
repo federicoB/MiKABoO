@@ -31,10 +31,8 @@ int main(int argc, char* * argv[]) {
     thread_init();
     //initialize inter-process communication
     msgq_init();
-    //initialize processes' ready queue
-    INIT_LIST_HEAD(&readyQueue);
-    //initialize processes' wait queue
-    INIT_LIST_HEAD(&waitQueue);
+    //initialize scheduler data structures
+    sched_init();
     //set syscall/breakpoint handler
     setHandler(SYSBK_NEWAREA, (memaddress) sys_bk_handler);
     //set PGM trap handler
@@ -53,6 +51,8 @@ int main(int argc, char* * argv[]) {
     thread->t_s.sp = RAM_TOP - FRAME_SIZE;
     //set program counter as the address of the first instruction of the test program
     thread->t_s.pc = (memaddress) test;
+    //increase the number of thread
+    totalThread++;
     //enqueue the thread in the ready queue
     sched_enqueue(&readyQueue, thread);
     //call the scheduler
