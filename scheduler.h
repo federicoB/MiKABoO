@@ -1,3 +1,6 @@
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
+
 #include "mikabooq.h"
 
 //ready threads' queue
@@ -10,3 +13,5 @@ void scheduler();
 void sched_enqueue(struct list_head *sched_queue, struct tcb_t *thread);
 struct tcb_t* sched_dequeue(struct list_head* sched_queue);
 struct tcb_t* sched_top(struct list_head* sched_queue);
+
+#endif /* SCHEDULER_H */
