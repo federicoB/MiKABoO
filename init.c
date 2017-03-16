@@ -2,6 +2,8 @@
 #include "mikabooq.h"
 #include "scheduler.h"
 #include "base.h"
+#include "exception.h"
+#include "interrupt.h"
 
 //declare an extern test function
 extern void test();
@@ -33,6 +35,14 @@ int main(int argc, char* * argv[]) {
     INIT_LIST_HEAD(&readyQueue);
     //initialize processes' wait queue
     INIT_LIST_HEAD(&waitQueue);
+    //set syscall/breakpoint handler
+    setHandler(SYSBK_NEWAREA, (memaddress) sys_bk_handler);
+    //set PGM trap handler
+    setHandler(PGMTRAP_NEWAREA, (memaddress) pgm_trap_handler);
+    //set TLB exception handler
+    setHandler(TLB_NEWAREA, (memaddress) tlb_handler);
+    //set interrupt handler
+    setHandler(INT_NEWAREA, (memaddress) int_handler);
     //create a new process with the root process as parent
     struct pcb_t* newProc = proc_alloc(rootPCB);
     //create a thread for the previously created process

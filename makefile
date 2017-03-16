@@ -3,7 +3,7 @@ BUILD_DIR = build
 DIST_DIR = dist
 UARM_OBJECT_FILES = /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o
 KERNEL_STRUCT_OBJ = $(UARM_OBJECT_FILES) $(BUILD_DIR)/tcbImpl.o $(BUILD_DIR)/pcbImpl.o $(BUILD_DIR)/msgqImpl.o
-PHASE_2_OBJ = $(KERNEL_STRUCT_OBJ) $(BUILD_DIR)/init.o $(BUILD_DIR)/scheduler.o $(BUILD_DIR)/p2test.o
+PHASE_2_OBJ = $(KERNEL_STRUCT_OBJ) $(BUILD_DIR)/init.o $(BUILD_DIR)/scheduler.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/exception.o $(BUILD_DIR)/p2test.o
 DEBUG_FLAGS = -g
  
 all: $(DIST_DIR)/test1 $(DIST_DIR)/test2
@@ -32,7 +32,7 @@ $(BUILD_DIR)/scheduler.o: scheduler.c scheduler.h mikabooq.h
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/scheduler.o scheduler.c
 
-$(BUILD_DIR)/init.o: init.c scheduler.h mikabooq.h base.h
+$(BUILD_DIR)/init.o: init.c scheduler.h mikabooq.h base.h exception.h interrupt.h
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/init.o init.c
 	
@@ -43,6 +43,14 @@ $(BUILD_DIR)/p1test.o: p1test.c mikabooq.h const.h
 $(BUILD_DIR)/p2test.o: p2test.c
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/p2test.o p2test.c
+
+$(BUILD_DIR)/exception.o: exception.c exception.h
+	mkdir -p $(BUILD_DIR)
+	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/exception.o exception.c
+
+$(BUILD_DIR)/interrupt.o: interrupt.c interrupt.h
+	mkdir -p $(BUILD_DIR)
+	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/interrupt.o interrupt.c
 
 clean:
 	rm -r ./$(BUILD_DIR)
