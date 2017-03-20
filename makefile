@@ -44,7 +44,7 @@ $(BUILD_DIR)/p2test.o: p2test.c
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/p2test.o p2test.c
 
-$(BUILD_DIR)/exception.o: exception.c exception.h
+$(BUILD_DIR)/exception.o: exception.c exception.h scheduler.h
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/exception.o exception.c
 
