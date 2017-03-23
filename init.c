@@ -54,7 +54,7 @@ int main(int argc, char* * argv[]) {
     //increase the number of thread
     totalThread++;
     //enqueue the thread in the ready queue
-    sched_enqueue(&readyQueue, thread);
+    thread_enqueue(thread, &readyQueue);
     //call the scheduler
     scheduler();
     //this point should never be reached
