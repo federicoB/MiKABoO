@@ -1,4 +1,4 @@
-PREPROCESSOR_OPTIONS = -D UARM_MACHINE_COMPILING=1 -I/usr/include/uarm -I$(CURDIR) -include stdint.h
+PREPROCESSOR_OPTIONS = -D UARM_MACHINE_COMPILING=1 -I/usr/include/uarm -I$(CURDIR)
 BUILD_DIR = build
 DIST_DIR = dist
 UARM_OBJECT_FILES = /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o

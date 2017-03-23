@@ -1,113 +1,233 @@
 #ifndef MIKABOOQ_H
 #define MIKABOOQ_H
+
 #include <listx.h>
 #include <uARMtypes.h>
+#include <stdint.h>
 
+/**
+ * A process control block.
+ */
 struct pcb_t {
-	struct pcb_t * p_parent ; /* pointer to parent */
-	struct list_head p_threads; /* list of threads */
+    
+    /**
+     * pcb_t: a pointer to the parent process.
+     * NULL if the root of the process tree
+     */
+    struct pcb_t* p_parent;
+    
+    /**
+     * list_head: entry point of the threads list.
+     */
+    struct list_head p_threads;
 
-	struct list_head p_children; /* list of children (hierarchy of processes) */
-	struct list_head p_siblings; /* link the other siblings (children of p_parent) */
+    /**
+     * list_head: entry point of the children processes list.
+     * This implements the processes hierarchy.
+     */
+    struct list_head p_children;
+    
+    /**
+     * list_head: link (or "hook") to siblings.
+     * Used to add this pcb_t to a list.
+     */
+    struct list_head p_siblings;
 };
 
-#define T_STATUS_NONE  0    /* unused thread descriptor */
+/**
+ * int: status "unused thread descriptor".
+ */
+#define T_STATUS_NONE  0
+
+/**
+ * int: status "thread ready".
+ */
 #define T_STATUS_READY 1
+
+/**
+ * int: status "thread waiting for a message".
+ */
 #define T_STATUS_W4MSG 4
 
+/**
+ * A thread control block.
+ */
 struct tcb_t {
-	struct pcb_t *t_pcb; /* pointer to the process */
-	state_t t_s ; /* processor state */
+    
+    /**
+     * pcb_t: a pointer to the process.
+     */
+    struct pcb_t* t_pcb;
+    
+    /**
+     * state_t: the cpu state clone.
+     */
+    state_t t_s ;
 
-	int t_status;
-	
-	struct tcb_t *t_wait4sender; /* expected sender (if t_status == T_STATUS_W4MSG), NULL means accept msg from anybody */
-	struct list_head t_next; /* link the other elements of the list of threads in the same process */
-	struct list_head t_sched; /* link the other elements on the same scheduling list */
-	struct list_head t_msgq; /* list of pending messages for the current thread */
+    int t_status;
+
+    /**
+     * tcb_t*: expected sender. NULL means anybody.
+     * This is valid only if t_status == T_STATUS_W4MSG.
+     */
+    struct tcb_t* t_wait4sender;
+    
+    /**
+     * list_head: link (or "hook") to the other elements of the list of threads in the same process.
+     * Used to add this tcb_t to a process's threads list.
+     */
+    struct list_head t_next;
+    
+    /**
+     * list_head: link (or "hook") to other elements on the same scheduling list.
+     * Used to add this tcb_t to a scheduling list.
+     */
+    struct list_head t_sched;
+    
+    /**
+     * list_head: entry point of the pending messages list.
+     */
+    struct list_head t_msgq;
 };
 
+/**
+ * An IPC message.
+ */
 struct msg_t {
-	struct tcb_t *m_sender; /* sender thread */
-	uintptr_t m_value; /* payload of the message */
+    
+    /**
+     * tcb_t*: the message sender.
+     */
+    struct tcb_t* m_sender;
+    
+    /**
+     * uintptr_t: the message payload.
+     */
+    uintptr_t m_value;
 
-	struct list_head m_next; /* link the other elements of the pending message queue */
+    /**
+     * list_head: link (or "hook") to the next pending message in queue.
+     * Used to add this msg_t to a list (usead as queue).
+     */
+    struct list_head m_next;
 };
 
-/************************************** PROC MGMT ************************/
+//processes management functions
 
-/* initialize the data structure */
-/* the return value is the address of the root process */
-struct pcb_t *proc_init(void);
+/**
+ * Initialize processes data structures and allocate the root process.
+ * @return pcb_t*: pointer to the allocated root process.
+ */
+struct pcb_t* proc_init(void);
 
-/* alloc a new empty pcb (as a child of p_parent) */
-/* p_parent cannot be NULL */
-struct pcb_t *proc_alloc(struct pcb_t *p_parent);
+/**
+ * Allococates a new empty pcb (as a child of p_parent).
+ * @param p_parent pcb_t*: the parent process (should not be NULL).
+ * @return pcb_t*: a pointer to the allocated process or NULL in case of errors (p_parent == NULL or no more pcb-s are available).
+ */
+struct pcb_t* proc_alloc(struct pcb_t* p_parent);
 
-/* delete a process (properly updating the process tree links) */
-/* this function must fail if the process has threads or children. */
-/* return value: 0 in case of success, -1 otherwise */
-int proc_delete(struct pcb_t *oldproc);
+/**
+ * Deletes a process (properly updating the process tree links).
+ * Fails if oldproc has threads or children.
+ * @param oldproc pcb_t: the process to remove.
+ * @return int: 0 in case of success, -1 otherwise.
+ */
+int proc_delete(struct pcb_t* oldproc);
 
-/* return the pointer to the first child (NULL if the process has no children) */
-struct pcb_t *proc_firstchild(struct pcb_t *proc);
+/**
+ * Returns a pointer to the first child of the given process.
+ * @param proc pcb_t: the process.
+ * @return pcb_t*: pointer to the first child or NULL if the given process has no children.
+ */
+struct pcb_t* proc_firstchild(struct pcb_t* proc);
 
-/* return the pointer to the first thread (NULL if the process has no threads) */
-struct tcb_t *proc_firstthread(struct pcb_t *proc);
+/**
+ * Returns a pointer to the first thread of the given process.
+ * @param proc pcb_t: the process.
+ * @return tcb_t*: pointer to the first thread or NULL if the given process has no threads.
+ */
+struct tcb_t* proc_firstthread(struct pcb_t* proc);
 
-/****************************************** THREAD ALLOCATION ****************/
+//threads management functions
 
-/* initialize the data structure */
+/**
+ * Initialize threads data structures.
+ */
 void thread_init(void);
 
-/* alloc a new tcb (as a thread of process) */
-/* return -1 if process == NULL or mo more available tcb-s.
-	 return 0 (success) otherwise */
-struct tcb_t *thread_alloc(struct pcb_t *process);
+/**
+ * Allococates a new empty tcb (as a thread of process).
+ * @param process pcb_t*: the process (should not be NULL).
+ * @return tcb_t*: a pointer to the allocated tcb or NULL in case of errors (process == NULL or no more tcb-s are available).
+ */
+struct tcb_t* thread_alloc(struct pcb_t* process);
 
-/* Deallocate a tcb (unregistering it from the list of threads of
-	 its process) */
-/* it fails if the message queue is not empty (returning -1) */
+/**
+ * Deallocates a thread (unregistering it from the list of threads of its process).
+ * Fails if the message queue is not empty.
+ * @param oldthread tcb_t: the thread to deallocate.
+ * @return int: 0 in case of success, -1 otherwise.
+ */
 int thread_free(struct tcb_t *oldthread);
 
-/*************************** THREAD QUEUE ************************/
+/**
+ * Enqueues the given thread in the given queue.
+ * @param new tcb_t*: the thread.
+ * @param queue list_head*: the queue entry point.
+ */
+void thread_enqueue(struct tcb_t* new, struct list_head* queue);
 
-/* add a tcb to the scheduling queue */
-void thread_enqueue(struct tcb_t *new, struct list_head *queue);
+/**
+ * Returns the head element of a scheduling queue.
+ * @param queue list_head*: queue entry point.
+ * @return tcb_t*: a pointer to the head element or NULL if the queue is empty.
+ */
+struct tcb_t* thread_qhead(struct list_head* queue);
 
-/* return the head element of a scheduling queue.
-	 (this function does not dequeues the element)
-	 return NULL if the list is empty */
-struct tcb_t *thread_qhead(struct list_head *queue);
+/**
+ * Dequeue the first element of a scheduling queue.
+ * @param queue
+ * @return tcb_t*: a pointer to the head element or NULL if the queue is empty.
+ */
+struct tcb_t* thread_dequeue(struct list_head* queue);
 
-/* get the first element of a scheduling queue.
-	 return NULL if the list is empty */
-struct tcb_t *thread_dequeue(struct list_head *queue);
-
-static inline void thread_outqueue(struct tcb_t *this) {
-	list_del(&this->t_sched);
-}
-
+/**
+ * Useful foreach macro for threads in queue.
+ * @param pos tcb_t*: iterator.
+ * @param queue list_head*: queue entry point.
+ */
 #define for_each_thread_in_q(pos, queue) \
 	list_for_each_entry(pos, queue, t_sched)
 
-/*************************** MSG QUEUE ************************/
+//threads management functions
 
-/* initialize the data structure */
-/* the return value is the address of the root process */
-void msgq_init(void);
+/**
+ * Initialize messages data structures.
+ */
+void msgq_init();
 
-/* add a message to a message queue. */
-/* msgq_add fails (returning -1) if no more msgq elements are available */
-int msgq_add(struct tcb_t *sender, struct tcb_t *destination, uintptr_t value);
+/**
+ * Adds a message to the destination message queue with the given data.
+ * @param sender tcb_t*: message sender.
+ * @param destination tcb_t*: message destination.
+ * @param value uintptr_t: the payload.
+ * @return int: 0 in case of success or -1 in case of failure (e.g.: no more msg_t are available).
+ */
+int msgq_add(struct tcb_t* sender, struct tcb_t* destination, uintptr_t value);
 
-/* retrieve a message from a message queue */
-/* -> if sender == NULL: get a message from any sender
-	 -> if sender != NULL && *sender == NULL: get a message from any sender and store
-	 the address of the sending tcb in *sender
-	 -> if sender != NULL && *sender != NULL: get a message sent by *sender */
-/* return -1 if there are no messages in the queue matching the request.
-	 return 0 and store the message payload in *value otherwise. */
-int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value);
+/**
+ * Retrieve a message from the destination message queue matching the given request.
+ * <ul>
+ *  <li>if sender == NULL: get a message from any sender.</li>
+ *  <li>if sender != NULL &amp;&amp; *sender == NULL: get a message from any sender and store the address of the sending tcb in *sender.</li>
+ *  <li>if sender != NULL &amp;&amp *sender != NULL: get a message sent by *sender.</li>
+ * </ul>
+ * @param sender tcb_t**: (more info in the function description).
+ * @param destination tcb_t*: pointer to destination.
+ * @param value uintptr_t*: pointer to the area where the payload has to be saved.
+ * @return int: -1 if there is no message matching the request, 0 otherwise.
+ */
+int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value);
 
 #endif
