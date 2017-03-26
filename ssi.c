@@ -1,4 +1,5 @@
 #include "ssi.h"
+#include "const.h"
 
 void SSI_entry_point(){
     //TODO: implement
@@ -58,4 +59,24 @@ void thread_terminate(struct tcb_t* thread){
     totalThread--;
     //free the thread
     thread_free(thread);
+}
+
+struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
+    //the created thread
+    struct tcb_t* thread = NULL;
+    //if the allocation succedes (process != NULL && at least 1 free thread)
+    if((thread = thread_alloc(process)) != NULL){
+        //TODO: copy the state
+        //enqueue the thread in the ready queue
+        thread_enqueue(thread, &readyQueue);
+        //increase the total number of threads
+        totalThread++;
+    }
+    //else if fails
+    else{
+        //set the thread address as CREATENOGOOD
+        thread = (struct tcb_t*) CREATENOGOOD;
+    }
+    //return the result
+    return thread;
 }
