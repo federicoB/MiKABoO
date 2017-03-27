@@ -5,6 +5,6 @@ void memcopy(void* src, void* dst, size_tt size){
     //while there are bytes to copy
     while (size--){
         //copy current byte and then increment both pointers
-        *(char* src)++ = *(char* dst)++;
+        *(char*) src++ = *(char*) dst++;
     }
 }
