@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "mikabooq.h"
 #include "const.h"
 #include "listx.h"
@@ -11,9 +12,12 @@ struct pcb_t pcbArray[MAXPROC];
 struct list_head freePCB;
 
 struct pcb_t* proc_init(){
-    //if invalid const exit
-    //TODO check if exit can used with uarm or substitute with something similar supported
-    //if (MAXPROC <= 0) exit();
+    //if invalid const
+    if(MAXPROC <= 0) {
+        //print error message and panic
+        tprint("INVALID MAXPROC\n");
+        PANIC();
+    }
     //init the free list
     INIT_LIST_HEAD(&freePCB);
     //declare index

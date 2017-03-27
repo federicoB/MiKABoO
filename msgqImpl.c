@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <libuarm.h>
 #include "mikabooq.h"
 #include "const.h"
 #include "listx.h"
@@ -12,9 +13,12 @@ struct msg_t msgArray[MAXMSG];
 struct list_head freeMSG;
 
 void msgq_init(void){
-    //if invalid const exit
-    //TODO check if exit can used with uarm or substitute with something similar supported
-    //if(MAXMSG <= 0) exit();
+    //if invalid const
+    if(MAXMSG <= 0) {
+        //print error message and panic
+        tprint("INVALID MAXMSG\n");
+        PANIC();
+    }
     //init the free list
     INIT_LIST_HEAD(&freeMSG);
     //declare index

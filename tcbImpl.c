@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "mikabooq.h"
 #include "listx.h"
 #include "const.h"
@@ -11,9 +12,11 @@ struct tcb_t tcbArray[MAXTHREAD];
 struct list_head freeTCB;
 
 void thread_init(){
-    //if invalid const exit
-    //TODO check if exit can used with uarm or substitute with something similar supported
-    //if (MAXTHREAD <= 0) exit();
+    if(MAXTHREAD <= 0) {
+        //print error message and panic
+        tprint("INVALID MAXTHREAD\n");
+        PANIC();
+    }
     //init the free list
     INIT_LIST_HEAD(&freeTCB);
     //declare index
