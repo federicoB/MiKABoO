@@ -33,10 +33,18 @@ void proc_terminate(struct pcb_t* proc){
     proc_delete(proc);
 }
 
-struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
-    struct pcb_t* process = proc_alloc(parent);
-    struct tcb_t* firstThread = thread_alloc(process);
-    //TODO copy the state into the new thread (need the implementation of memcopy)
+struct pcb_t *proc_create(struct pcb_t *parent, state_t *state) {
+    struct pcb_t *process;
+    if ((process = proc_alloc(parent)) != NULL) {
+        struct tcb_t *firstThread;
+        if ((firstThread = thread_alloc(process)) != NULL) {
+            //TODO copy the state into the new thread (need the implementation of memcopy)
+        } else {
+            process = (struct pcb_t *) CREATENOGOOD;
+        }
+    } else {
+        process = (struct pcb_t *) CREATENOGOOD;
+    }
     return process;
 }
 
