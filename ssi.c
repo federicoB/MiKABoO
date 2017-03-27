@@ -34,17 +34,28 @@ void proc_terminate(struct pcb_t* proc){
 }
 
 struct pcb_t *proc_create(struct pcb_t *parent, state_t *state) {
+    //declare a pointer to the new process
     struct pcb_t *process;
+    //allocate a new process if possible
     if ((process = proc_alloc(parent)) != NULL) {
+        //declare a pointer to the new thread
         struct tcb_t *firstThread;
+        //allocate a new thread for the new process if possible
         if ((firstThread = thread_alloc(process)) != NULL) {
             //TODO copy the state into the new thread (need the implementation of memcopy)
-        } else {
+        }
+        //if some error occurred during thread allocation
+        else {
+            //set the process address to an error code
             process = (struct pcb_t *) CREATENOGOOD;
         }
-    } else {
+    }
+    //if some error occurred during process allocation
+    else {
+        //set the process addreass to an error code
         process = (struct pcb_t *) CREATENOGOOD;
     }
+    //return the new process
     return process;
 }
 
