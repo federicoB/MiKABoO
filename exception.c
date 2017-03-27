@@ -1,6 +1,7 @@
 #include "exception.h"
 #include "scheduler.h"
 #include "utils.h"
+#include "uARMconst.h"
 
 void tlb_handler(){
     //TODO: implement
@@ -14,7 +15,7 @@ void sys_bk_handler(){
     //TODO: implement
     
     //copy the old state in the tcb
-    memcopy(SYSBK_OLDAREA, &(runningThread->t_s), sizeof(state_t));
+    memcopy((state_t*) SYSBK_OLDAREA, &(runningThread->t_s), sizeof(state_t));
     
     //get the cause
     unsigned int cause = CAUSE_EXCCODE_GET(runningThread->t_s.CP15_Cause);

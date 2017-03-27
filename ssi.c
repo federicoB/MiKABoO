@@ -1,6 +1,7 @@
 #include "ssi.h"
 #include "const.h"
 #include "utils.h"
+#include "uARMconst.h"
 
 void SSI_entry_point(){
     //TODO: implement
@@ -90,7 +91,8 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
     struct tcb_t* thread = NULL;
     //if the allocation succedes (process != NULL && at least 1 free thread)
     if((thread = thread_alloc(process)) != NULL){
-        //TODO: copy the state
+        //copy the state
+        memcopy(state, &(thread->t_s), sizeof(state_t));
         //enqueue the thread in the ready queue
         thread_enqueue(thread, &readyQueue);
         //increase the total number of threads
