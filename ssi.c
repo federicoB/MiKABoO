@@ -33,6 +33,13 @@ void proc_terminate(struct pcb_t* proc){
     proc_delete(proc);
 }
 
+struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
+    struct pcb_t* process = proc_alloc(parent);
+    struct tcb_t* firstThread = thread_alloc(process);
+    //TODO copy the state into the new thread (need the implementation of memcopy)
+    return process;
+}
+
 void thread_terminate(struct tcb_t* thread){
     //TODO:check which queue contains the thread.
     //if in wait queue
