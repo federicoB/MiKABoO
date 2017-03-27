@@ -1,13 +1,15 @@
 #include "interrupt.h"
 #include "scheduler.h"
 #include "arch.h"
+#include "const.h"
 
 void int_handler(){
     //TODO: implement
     
     //if there was a thread running
     if(runningThread != NULL){
-        //TODO: copy the old state in the tcb
+        //copy the old state in the tcb
+        memcopy(SYSBK_OLDAREA,&(runningThread->t_s), sizeof(state_t));
     }
     //NOTE: more than one line and more than one device may have raised an interrupt.
     //Cause check is done in ascending priority order to handle the interrupt with highest priority first.
