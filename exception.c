@@ -1,5 +1,6 @@
 #include "exception.h"
 #include "scheduler.h"
+#include "const.h"
 
 void tlb_handler(){
     //TODO: implement
@@ -12,7 +13,8 @@ void pgm_trap_handler(){
 void sys_bk_handler(){
     //TODO: implement
     
-    //TODO: copy the old state in the tcb
+    //copy the old state in the tcb
+    memcopy(SYSBK_OLDAREA, &(runningThread->t_s), sizeof(state_t));
     
     //get the cause
     unsigned int cause = CAUSE_EXCCODE_GET(runningThread->t_s.CP15_Cause);
