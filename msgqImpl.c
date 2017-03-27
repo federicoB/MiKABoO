@@ -59,7 +59,7 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
             //get the first message
             selectedMSG = container_of(list_next(&(destination->t_msgq)),struct msg_t, m_next);
         }
-        //else if sender is not null but *sender is null (pointer to a null nointer)
+        //else if sender is not null but *sender is null (pointer to a null pointer)
         //(select any message and save the message sender)
         else if(sender != NULL && *sender == NULL){
             //get the first message

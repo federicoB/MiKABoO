@@ -27,7 +27,7 @@ void sys_bk_handler(){
     //else if something went wrong
     else{
         //print an error (here interrupts are masked)
-        tprint("SYS/BK HANDLER: Something went wonng\n");
+        tprint("SYS/BK HANDLER: Something went wrong\n");
         //panic
         PANIC();
     }

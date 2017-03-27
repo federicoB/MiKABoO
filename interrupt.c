@@ -50,7 +50,7 @@ void int_handler(){
     //else if something went wrong
     else{
         //print an error (here interrupts are masked)
-        tprint("INTERRUPT HANDLER: Something went wonng\n");
+        tprint("INTERRUPT HANDLER: Something went wrong\n");
         //panic
         PANIC();
     }

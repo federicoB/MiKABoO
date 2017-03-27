@@ -107,7 +107,7 @@ struct msg_t {
 
     /**
      * list_head: link (or "hook") to the next pending message in queue.
-     * Used to add this msg_t to a list (usead as queue).
+     * Used to add this msg_t to a list (used as queue).
      */
     struct list_head m_next;
 };
@@ -121,7 +121,7 @@ struct msg_t {
 struct pcb_t* proc_init(void);
 
 /**
- * Allococates a new empty pcb (as a child of p_parent).
+ * Allocates a new empty pcb (as a child of p_parent).
  * @param p_parent pcb_t*: the parent process (should not be NULL).
  * @return pcb_t*: a pointer to the allocated process or NULL in case of errors (p_parent == NULL or no more pcb-s are available).
  */
@@ -157,7 +157,7 @@ struct tcb_t* proc_firstthread(struct pcb_t* proc);
 void thread_init(void);
 
 /**
- * Allococates a new empty tcb (as a thread of process).
+ * Allocates a new empty tcb (as a thread of process).
  * @param process pcb_t*: the process (should not be NULL).
  * @return tcb_t*: a pointer to the allocated tcb or NULL in case of errors (process == NULL or no more tcb-s are available).
  */
