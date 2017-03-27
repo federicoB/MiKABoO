@@ -30,7 +30,7 @@
  * Error code for creation.
  * Used by the SSI.
  */
-#define CREATENOGOOD -1;
+#define CREATENOGOOD -1
 
 /**
  * Sends a message to the destination with the given payload.
