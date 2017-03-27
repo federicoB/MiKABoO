@@ -38,8 +38,6 @@ struct pcb_t *proc_create(struct pcb_t *parent, state_t *state) {
     struct pcb_t *process;
     //allocate a new process if possible
     if ((process = proc_alloc(parent)) != NULL) {
-        //declare a pointer to the new thread
-        struct tcb_t *firstThread;
         //allocate a new thread for the new process if possible
         if (thread_create(process, state) == (struct tcb_t *) CREATENOGOOD) {
             //if any error occurred during thread allocation
