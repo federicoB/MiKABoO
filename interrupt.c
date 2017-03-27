@@ -1,7 +1,7 @@
 #include "interrupt.h"
 #include "scheduler.h"
 #include "arch.h"
-#include "const.h"
+#include "utils.h"
 
 void int_handler(){
     //TODO: implement

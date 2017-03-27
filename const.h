@@ -51,18 +51,4 @@
 #define MsgRecv(source, payloadP) \
     ((tcb_t*) SYSCALL((unsigned int) RECV,(unsigned int) source,(unsigned int) payloadP, NULL))
 
-/**
- * Copies "size" bytes from source to destination.
- * Overlapping areas will lead to undefined behaviour.
- * @param source void*: pointer to the source area.
- * @param dest void*: pointer to the destination area.
- * @param size size_t: number of bytes to copy.
- */
-#define memcopy(source, dest, size) \
-    char* src = (char*) source; \
-    char* dst = (char*) dest; \
-    unsigned int s = size; \
-    while (s--){ \
-        *src++ = *dst++; \
-    }
 #endif
