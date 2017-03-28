@@ -25,6 +25,8 @@ void thread_init(){
     for (i = 0; i < MAXTHREAD; i++) {
         //add the tcb to the free list
         list_add(&(tcbArray[i].t_next), &freeTCB);
+        //set status as NONE
+        tcbArray[i].t_status = T_STATUS_NONE;
     }
 }
 
@@ -57,6 +59,8 @@ int thread_free(struct tcb_t* oldthread){
         list_del(&(oldthread->t_next));
         //add oldthread to the free list
         list_add(&(oldthread->t_next), &freeTCB);
+        //set status as NONE
+        oldthread->t_status = T_STATUS_NONE;
         //set result as 0 (success)
         result = 0;
     }

@@ -158,6 +158,8 @@ void thread_init(void);
 
 /**
  * Allocates a new empty tcb (as a thread of process).
+ * NOTE: t_status must be manually set to the right value according to the actual
+ * status. (E.g.: set to "ready" if the thread will be enqueued to the ready queue)
  * @param process pcb_t*: the process (should not be NULL).
  * @return tcb_t*: a pointer to the allocated tcb or NULL in case of errors (process == NULL or no more tcb-s are available).
  */
