@@ -32,6 +32,21 @@ struct pcb_t {
      * Used to add this pcb_t to a list.
      */
     struct list_head p_siblings;
+    
+    /**
+     * tcb_t*: pointer to the process-specific PRG trap manager.
+     */
+    struct tcb_t* prgMgr;
+    
+    /**
+     * tcb_t*: pointer to the process-specific TLB trap manager.
+     */
+    struct tcb_t* tlbMgr;
+    
+    /**
+     * tcb_t*: pointer to the process-specific SYS/BK trap manager.
+     */
+    struct tcb_t* sysMgr;
 };
 
 /**
