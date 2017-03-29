@@ -16,17 +16,17 @@ void SSI_entry_point(){
 
 void proc_terminate(struct pcb_t* proc){
     //declare an iterator
-    struct pcb_t* children;
+    struct pcb_t* child;
     //terminate the children of the process
-    list_for_each_entry(children, &(proc->p_children), p_siblings){
+    while((child = proc_firstchild(proc)) != NULL){
         //DFS-style recursive call
-        proc_terminate(children);
+        proc_terminate(child);
     }
     //the process has no childern at this point
     //declare an iterator
     struct tcb_t* thread;
     //delete threads of the process
-    list_for_each_entry(thread, &(proc->p_threads), t_next){
+    while((thread = proc_firstthread(proc)) != NULL){
         //terminate thread
         thread_terminate(thread);
     }
