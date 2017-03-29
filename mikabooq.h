@@ -34,9 +34,9 @@ struct pcb_t {
     struct list_head p_siblings;
     
     /**
-     * tcb_t*: pointer to the process-specific PRG trap manager.
+     * tcb_t*: pointer to the process-specific PGM trap manager.
      */
-    struct tcb_t* prgMgr;
+    struct tcb_t* pgmMgr;
     
     /**
      * tcb_t*: pointer to the process-specific TLB trap manager.

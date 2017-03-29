@@ -55,8 +55,8 @@ struct pcb_t* proc_alloc(struct pcb_t* p_parent){
         list_add(&(newPCB->p_siblings), &(p_parent->p_children));
         //set the parent in the new pcb
         newPCB->p_parent = p_parent;
-        //init prg manager as NULL
-        newPCB->prgMgr = NULL;
+        //init pgm manager as NULL
+        newPCB->pgmMgr = NULL;
         //init tlb manager as NULL
         newPCB->tlbMgr = NULL;
         //init sys/bk manager as NULL
