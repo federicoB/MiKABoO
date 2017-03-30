@@ -1,6 +1,8 @@
 #ifndef CONST_H
 #define CONST_H
 
+#include "mikabooq.h"
+
 /**
  * int: maximum number of processes in the system.
  */
@@ -110,6 +112,6 @@
  * @return tcb_t*: sender thread.
  */
 #define MsgRecv(source, payloadP) \
-    ((tcb_t*) SYSCALL((unsigned int) RECV,(unsigned int) source,(unsigned int) payloadP, NULL))
+    ((struct tcb_t*) SYSCALL((unsigned int) RECV,(unsigned int) source,(unsigned int) payloadP, NULL))
 
 #endif
