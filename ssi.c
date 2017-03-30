@@ -8,9 +8,12 @@ void SSI_entry_point(){
     
     //forever (until killed)
     while(1){
-        //receive a message
-        //handle service request
-        //reply to the message (if necessary)
+        //pointer to the ssi msg
+        struct ssimsg_t* msg = NULL;
+        //receive a message and save the sender
+        struct tcb_t* thread = MsgRecv(NULL, &msg);
+        //TODO: handle service request
+        //TODO: reply to the message (if necessary)
     }
 }
 
@@ -35,13 +38,13 @@ void proc_terminate(struct pcb_t* proc){
     proc_delete(proc);
 }
 
-struct pcb_t *proc_create(struct pcb_t *parent, state_t *state) {
+struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
     //declare a pointer to the new process
     struct pcb_t* process;
     //allocate a new process and if succeeded
     if ((process = proc_alloc(parent)) != NULL) {
         //allocate a new thread for the new process and if failed
-        if (thread_create(process, state) == (struct tcb_t *) CREATENOGOOD) {
+        if (thread_create(process, state) == (struct tcb_t*) CREATENOGOOD) {
             //delete the process
             proc_delete(process);
             //set the process address to an error code
@@ -106,4 +109,81 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
     }
     //return the result
     return thread;
+}
+
+unsigned int get_CPU_time(struct pcb_t* applicant){
+    //return the CPU time of the applicant's parent process
+    return applicant->CPU_time;
+}
+
+int set_SYSBK_manager(struct tcb_t* applicant, struct tcb_t* manager){
+    //the return code (default: error)
+    int result = -1;
+    //if the managers already set
+    if (applicant->t_pcb->sysMgr != NULL){
+        //terminate the process
+        proc_terminate(applicant->t_pcb);
+    }
+    //otherwise if not set
+    else{
+        //set the manager
+        applicant->t_pcb->sysMgr = manager;
+        //set the result as succeeded
+        result = 0;
+    }
+    //return the result
+    return result;
+}
+
+int set_TLB_manager(struct tcb_t* applicant, struct tcb_t* manager){
+    //the return code (default: error)
+    int result = -1;
+    //if the managers already set
+    if (applicant->t_pcb->tlbMgr != NULL){
+        //terminate the process
+        proc_terminate(applicant->t_pcb);
+    }
+    //otherwise if not set
+    else{
+        //set the manager
+        applicant->t_pcb->tlbMgr = manager;
+        //set the result as succeeded
+        result = 0;
+    }
+    //return the result
+    return result;
+}
+
+int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager){
+    //the return code (default: error)
+    int result = -1;
+    //if the managers already set
+    if (applicant->t_pcb->pgmMgr != NULL){
+        //terminate the process
+        proc_terminate(applicant->t_pcb);
+    }
+    //otherwise if not set
+    else{
+        //set the manager
+        applicant->t_pcb->pgmMgr = manager;
+        //set the result as succeeded
+        result = 0;
+    }
+    //return the result
+    return result;
+}
+
+void SSIRequest(unsigned int service, unsigned int payload, unsigned int* reply){
+    //TODO: implement
+    
+    //declare a "fat" message
+    struct ssimsg_t ssimsg;
+    //set the service
+    ssimsg.service = service;
+    //set the argument
+    ssimsg.argument = payload;
+    //send a message to the SSI
+    MsgSend(SSI_addr, &ssimsg);
+    //receive a message from the SSI
+    MsgRecv(SSI_addr, reply);
 }

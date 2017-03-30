@@ -55,6 +55,9 @@ int main(int argc, char** argv[]) {
     totalThread++;
     //enqueue the thread in the ready queue
     thread_enqueue(thread, &readyQueue);
+    
+    //TODO: start the SSI and save its address.
+    
     //call the scheduler
     scheduler();
     //this point should never be reached
