@@ -61,6 +61,8 @@ struct pcb_t* proc_alloc(struct pcb_t* p_parent){
         newPCB->tlbMgr = NULL;
         //init sys/bk manager as NULL
         newPCB->sysMgr = NULL;
+        //init CPU time as zero
+        newPCB->CPU_time = 0;
     }//else leave as NULL
     //return the result
     return newPCB;

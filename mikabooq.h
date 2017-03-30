@@ -47,6 +47,12 @@ struct pcb_t {
      * tcb_t*: pointer to the process-specific SYS/BK trap manager.
      */
     struct tcb_t* sysMgr;
+    
+    /**
+     * unsigned int: total cpu execution time for the process.
+     * This includes all of its threads.
+     */
+    unsigned int CPU_time;
 };
 
 /**
