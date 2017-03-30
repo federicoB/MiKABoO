@@ -37,35 +37,33 @@ void proc_terminate(struct pcb_t* proc){
 
 struct pcb_t *proc_create(struct pcb_t *parent, state_t *state) {
     //declare a pointer to the new process
-    struct pcb_t *process;
-    //allocate a new process if possible
+    struct pcb_t* process;
+    //allocate a new process and if succeeded
     if ((process = proc_alloc(parent)) != NULL) {
-        //allocate a new thread for the new process if possible
+        //allocate a new thread for the new process and if failed
         if (thread_create(process, state) == (struct tcb_t *) CREATENOGOOD) {
-            //if any error occurred during thread allocation
-            //delete just created process
+            //delete the process
             proc_delete(process);
             //set the process address to an error code
-            process = (struct pcb_t *) CREATENOGOOD;
+            process = (struct pcb_t*) CREATENOGOOD;
         }
     }
-        //if some error occurred during process allocation
+    //else if process alllocation failed
     else {
         //set the process addreass to an error code
-        process = (struct pcb_t *) CREATENOGOOD;
+        process = (struct pcb_t*) CREATENOGOOD;
     }
     //return the new process
     return process;
 }
 
 void thread_terminate(struct tcb_t* thread){
-    //TODO:check which queue contains the thread.
-    //if in wait queue
+    //if in wait queue (not in ready and not unused)
+    if(thread->t_status != T_STATUS_READY){
         //decrease softblock
-        //softBlockedThread--
-        //update wait structures if necessary
-    //else if in ready queue -> do nothing special
-    
+        softBlockedThread--;
+        //TODO: update wait structures if necessary (e.g.: IO)
+    }
     //sender of the message
     struct tcb_t* sender = NULL;
     //the message payload
@@ -77,7 +75,8 @@ void thread_terminate(struct tcb_t* thread){
         //reset the sender as NULL
         sender = NULL;
     }
-
+    //TODO: handle messages with this thread as a sender
+    //TODO: handle threads waiting for messages from this thread
     //remove the thread from the queue (no matter which one)
     list_del(&(thread->t_sched));
     //decrease the number of threads
@@ -95,6 +94,8 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
         memcopy(state, &(thread->t_s), sizeof(state_t));
         //enqueue the thread in the ready queue
         thread_enqueue(thread, &readyQueue);
+        //set status as ready
+        thread->t_status = T_STATUS_READY;
         //increase the total number of threads
         totalThread++;
     }
