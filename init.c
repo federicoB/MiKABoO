@@ -24,7 +24,7 @@ void setHandler(memaddress newArea, memaddress handler){
     newAreaP->CP15_Control = CP15_DISABLE_VM(newAreaP->CP15_Control);
 }
 
-int main(int argc, char* * argv[]) {
+int main(int argc, char** argv[]) {
     //get root process
     struct pcb_t* rootPCB = proc_init();
     //initialize threads
