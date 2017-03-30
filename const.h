@@ -33,6 +33,67 @@
 #define CREATENOGOOD -1
 
 /**
+ * Mnemonic SSI service code: child process creation.
+ */
+#define CREATE_PROCESS 1
+
+/**
+ * Mnemonic SSI service code: brother thread creation.
+ */
+#define CREATE_THREAD 2
+
+/**
+ * Mnemonic SSI service code: process termination.
+ */
+#define TERMINATE_PROCESS 3
+
+/**
+ * Mnemonic SSI service code: thread termination.
+ */
+#define TERMINATE_THREAD 4
+
+/**
+ * Mnemonic SSI service code: set process-specific PGM trap manager.
+ */
+#define SETPGMMGR 5
+
+/**
+ * Mnemonic SSI service code: set process-specific TLB trap manager.
+ */
+#define SETTLBMGR 6
+
+/**
+ * Mnemonic SSI service code: set process-specific SYS/BK trap manager.
+ */
+#define SETSYSMGR 7
+
+/**
+ * Mnemonic SSI service code: get cpu execution time.
+ */
+#define GETCPUTIME 8
+
+/**
+ * Mnemonic SSI service code: wait for pseudoclock tick.
+ */
+#define WAIT_FOR_CLOCK 9
+
+/**
+ * Mnemonic SSI service code: send IO command and wait.
+ */
+#define WAIT_FOR_IO 10
+
+/**
+ * Mnemonic SSI service code: get the process's number.
+ */
+#define GET_PROCESS_N 11
+
+/**
+ * Mnemonic SSI service code: get the thread's number.
+ */
+#define GET_THREAD_N 12
+
+
+/**
  * Sends a message to the destination with the given payload.
  * Implemented with a system call.
  * @param destination tcb_t*: pointer to the destination thread.
