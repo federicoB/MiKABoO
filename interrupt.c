@@ -4,6 +4,29 @@
 #include "utils.h"
 #include "uARMconst.h"
 
+int get_highest_priority_interrupt(unsigned int* bitmap){
+	//power of 2 bit mask
+    unsigned int mask = 1;
+    //position of the first least significant(LSB) bit that equals 1 
+    int pos = 0;
+    if(*bitmap != 0){
+    	//while LSB that equals 1 not found
+	    while((*bitmap & mask)==0){
+	    	//shift the bit mask by one bit
+	        mask<<=1;
+	        //increment the LSB's position
+	        pos++;
+	    }
+	}
+	//special case: bitmap == 0
+	else{
+		//invalid value, which happens only if bitmap is 0
+		pos = -1;
+	}
+	//return the correct position
+    return pos;
+}
+
 void int_handler(){
     //TODO: implement
     
