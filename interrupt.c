@@ -34,6 +34,8 @@ void int_handler(){
     if(runningThread != NULL){
         //copy the old state in the tcb
         memcopy((state_t*) INT_OLDAREA, &(runningThread->t_s), sizeof(state_t));
+        //handle thread accounting
+        handle_accounting();
     }
     //NOTE: more than one line and more than one device may have raised an interrupt.
     //Cause check is done in ascending priority order to handle the interrupt with highest priority first.

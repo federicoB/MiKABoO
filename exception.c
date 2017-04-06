@@ -20,6 +20,10 @@ void tlb_handler(){
         //terminate the process, all its threads, and the whole subtree
         proc_terminate(runningThread->t_pcb);
     }
+    //handle thread accounting (at the end of the handler)
+    handle_accounting();
+    //call the scheduler
+    scheduler();
 }
 
 void pgm_trap_handler(){
@@ -38,6 +42,10 @@ void pgm_trap_handler(){
         //terminate the process, all its threads and the whole subtree
         proc_terminate(runningThread->t_pcb);
     }
+    //handle thread accounting (at the end of the handler)
+    handle_accounting();
+    //call the scheduler
+    scheduler();
 }
 
 void sys_bk_handler(){
@@ -63,6 +71,10 @@ void sys_bk_handler(){
         //panic
         PANIC();
     }
+    //handle thread accounting (at the end of the handler)
+    handle_accounting();
+    //call the scheduler
+    scheduler();
 }
 
 void trap_passup(struct tcb_t* manager){
@@ -84,8 +96,6 @@ void trap_passup(struct tcb_t* manager){
         if(manager->t_status != T_STATUS_READY){
             //TODO: wake manager up
         }
-        //call the scheduler
-        scheduler();
     }
     //else (message limit exceeded)
     else{

@@ -3,7 +3,7 @@ BUILD_DIR = build
 DIST_DIR = dist
 UARM_OBJECT_FILES = /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o
 KERNEL_STRUCT_OBJ = $(UARM_OBJECT_FILES) $(BUILD_DIR)/tcbImpl.o $(BUILD_DIR)/pcbImpl.o $(BUILD_DIR)/msgqImpl.o
-PHASE_2_OBJ = $(KERNEL_STRUCT_OBJ) $(BUILD_DIR)/init.o $(BUILD_DIR)/scheduler.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/exception.o $(BUILD_DIR)/ssi.o $(BUILD_DIR)/p2test.o $(BUILD_DIR)/utils.o
+PHASE_2_OBJ = $(KERNEL_STRUCT_OBJ) $(BUILD_DIR)/init.o $(BUILD_DIR)/scheduler.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/exception.o $(BUILD_DIR)/ssi.o $(BUILD_DIR)/p2test.o $(BUILD_DIR)/utils.o /usr/include/uarm/libdiv.o
 DEBUG_FLAGS = -g
  
 all: $(DIST_DIR)/test1 $(DIST_DIR)/test2

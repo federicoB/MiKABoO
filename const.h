@@ -94,6 +94,15 @@
  */
 #define GET_THREAD_N 12
 
+/**
+ * MiKaBoO time slice in microseconds.
+ */
+#define TIME_SLICE 5000
+
+/**
+ * MiKaBoO pseudo-clock tick time in microseconds.
+ */
+#define PSEUDO_TICK 100000
 
 /**
  * Sends a message to the destination with the given payload.
