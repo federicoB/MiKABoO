@@ -67,6 +67,11 @@ void thread_terminate(struct tcb_t* thread){
         softBlockedThread--;
         //TODO: update wait structures if necessary (e.g.: IO)
     }
+    //if thread to delete is running
+    if(thread == runningThread){
+        //set no running thread
+        runningThread = NULL;
+    }
     //sender of the message
     struct tcb_t* sender = NULL;
     //the message payload
