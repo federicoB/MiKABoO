@@ -48,7 +48,7 @@ $(BUILD_DIR)/exception.o: exception.c exception.h scheduler.h utils.h ssi.h mika
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/exception.o exception.c
 
-$(BUILD_DIR)/interrupt.o: interrupt.c interrupt.h scheduler.h utils.h
+$(BUILD_DIR)/interrupt.o: interrupt.c interrupt.h scheduler.h utils.h const.h
 	mkdir -p $(BUILD_DIR)
 	arm-none-eabi-gcc $(DEBUG_FLAGS) -mcpu=arm7tdmi -c $(PREPROCESSOR_OPTIONS) -o $(BUILD_DIR)/interrupt.o interrupt.c
 

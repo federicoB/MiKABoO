@@ -3,33 +3,33 @@
 #include "arch.h"
 #include "utils.h"
 #include "uARMconst.h"
+#include "const.h"
 
 int get_highest_priority_interrupt(unsigned int* bitmap){
-	//power of 2 bit mask
+    //power of 2 bit mask
     unsigned int mask = 1;
     //position of the first least significant(LSB) bit that equals 1 
     int pos = 0;
+    //if the given bitmap is not zero
     if(*bitmap != 0){
-    	//while LSB that equals 1 not found
-	    while((*bitmap & mask)==0){
-	    	//shift the bit mask by one bit
-	        mask<<=1;
-	        //increment the LSB's position
-	        pos++;
-	    }
-	}
-	//special case: bitmap == 0
-	else{
-		//invalid value, which happens only if bitmap is 0
-		pos = -1;
-	}
-	//return the correct position
+        //while the masked bitmap equals zero
+        while((*bitmap & mask) == 0){
+            //shift the bit mask by one bit
+            mask <<= 1;
+            //increment the LSB position
+            pos++;
+        }
+    }
+    //special case: bitmap == 0
+    else{
+        //invalid value, which happens only if bitmap is 0
+        pos = -1;
+    }
+    //return the position
     return pos;
 }
 
 void int_handler(){
-    //TODO: implement
-    
     //if there was a thread running
     if(runningThread != NULL){
         //copy the old state in the tcb
@@ -45,35 +45,42 @@ void int_handler(){
     int IPCause = getCAUSE();
     //if there is an interrupt raised in the inter processor interrupt line
     if(CAUSE_IP_GET(IPCause, IL_IPI)){
-        //TODO: handle
+        //NOT IMPLEMENTED IN THIS VERSION. Currently in single core mode only.
     }
     //else if there is an interrupt in the cpu timer line
     else if(CAUSE_IP_GET(IPCause, IL_CPUTIMER)){
-        //TODO: handle
+        //NOT IMPLEMENTED IN THIS VERSION Currently in single core mode only.
     }
     //else if there is an interrupt raised in the interval timer line
     else if(CAUSE_IP_GET(IPCause, IL_TIMER)){
-        //TODO: handle
+        //NOTE: at the moment accounting and pseudoclock handling are done regardless
+        //of the actual interrupt type.
+        //This block is kept here for future use.
     }
     //else if there is an interrupt raised in the disk line
     else if(CAUSE_IP_GET(IPCause, IL_DISK)){
-        //TODO: handle
+        //use standard device handler
+        standard_device_handler(IL_DISK);
     }
     //else if there is an interrupt raised in the tape line
     else if(CAUSE_IP_GET(IPCause, IL_TAPE)){
-        //TODO: handle
+        //use standard device handler
+        standard_device_handler(IL_TAPE);
     }
     //else if there is an interrupt raised in the network line
     else if(CAUSE_IP_GET(IPCause, IL_ETHERNET)){
-        //TODO: handle
+        //use standard device handler
+        standard_device_handler(IL_ETHERNET);
     }
     //else if there is an interrupt raised in the printer line
     else if(CAUSE_IP_GET(IPCause, IL_PRINTER)){
-        //TODO: handle
+        //use standard device handler
+        standard_device_handler(IL_PRINTER);
     }
     //else if there is an interrupt raised in the terminal line
     else if(CAUSE_IP_GET(IPCause, IL_TERMINAL)){
-        //TODO: handle
+        //use standard device handler
+        standard_device_handler(IL_TERMINAL);
     }
     //else if something went wrong
     else{
@@ -83,6 +90,50 @@ void int_handler(){
         PANIC();
     }
     //call the scheduler
-    scheduler();
-        
+    scheduler();     
+}
+
+void standard_device_handler(int lineNumber){
+    //get the interrupt line bitmap
+    unsigned int* bitmap = (unsigned int*) CDEV_BITMAP_ADDR(lineNumber);
+    //get the highest priority interrupt in the bitmap
+    int device = get_highest_priority_interrupt(bitmap);
+    //the device command register
+    unsigned int* command;
+    //the device status register
+    unsigned int* status;
+    //if the device is a terminal
+    if(lineNumber == IL_TERMINAL){
+        //Terminals have 2 sub-devices: a reader and a writer. The latter has higher priority.
+        //compute the read status register address
+        unsigned int* statusRead = (unsigned int*) (DEV_REG_ADDR(IL_TERMINAL, device) + TERM_READ_STATUS);
+        //compute the write status register address
+        unsigned int* statusWrite = (unsigned int*) (DEV_REG_ADDR(IL_TERMINAL, device) + TERM_WRITE_STATUS);   
+	//if there is a write interrupt pending (higher priority)
+	if((*(statusWrite) & 0x0F) == DEV_TTRS_S_CHARTRSM){
+            //set command register as the one of write device
+            command = (unsigned int*) (DEV_REG_ADDR(IL_TERMINAL, device) + TERM_WRITE_COMMAND);
+            //set command register as the one of write device
+            status = statusWrite;
+        }
+	//else if there is a read interrupt pending (lower priority)
+	else if((*(statusRead) & 0x0F) == DEV_TRCV_S_CHARRECV){
+            //set command register as the one of write device
+            command = (unsigned int*) (DEV_REG_ADDR(IL_TERMINAL, device) + TERM_READ_COMMAND);
+            //set command register as the one of write device
+            status = statusRead;
+        }
+    }
+    //otherwise if is a generic device
+    else{
+        //get the command register
+        command = (unsigned int*) (DEV_REG_ADDR(lineNumber, device) + GENERIC_COMMAND);
+        //get the status register
+        status = (unsigned int*) DEV_REG_ADDR(lineNumber, device);
+    }
+    
+    //TODO: send a message to the SSI (wake up)
+    
+    //send ack to device (set ack in commend register)
+    *command = DEV_C_ACK;
 }

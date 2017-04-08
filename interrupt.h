@@ -13,5 +13,11 @@ int get_highest_priority_interrupt(unsigned int* bitmap);
  */
 void int_handler();
 
+/**
+ * Handles interrupts from standard devices including terminals.
+ * @param lineNumber int: the interrupt line number.
+ */
+void standard_device_handler(int lineNumber);
+
 #endif /* INTERRUPT_H */
 

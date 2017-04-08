@@ -105,6 +105,31 @@
 #define PSEUDO_TICK 100000
 
 /**
+ * Generic device command register offset.
+ */
+#define GENERIC_COMMAND 0x00000004
+
+/**
+ * Terminal read status register offset.
+ */
+#define TERM_READ_STATUS 0x00000000
+
+/**
+ * Terminal read command register offset.
+ */
+#define TERM_READ_COMMAND GENERIC_COMMAND
+
+/**
+ * Terminal write status register offset.
+ */
+#define TERM_WRITE_STATUS 0x00000008
+
+/**
+ * Terminal write command register offset.
+ */
+#define TERM_WRITE_COMMAND 0x0000000C
+
+/**
  * Sends a message to the destination with the given payload.
  * Implemented with a system call.
  * @param destination tcb_t*: pointer to the destination thread.
