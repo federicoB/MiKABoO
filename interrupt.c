@@ -35,6 +35,8 @@ void int_handler(){
     if(runningThread != NULL){
         //copy the old state in the tcb
         memcopy((state_t*) INT_OLDAREA, &(runningThread->t_s), sizeof(state_t));
+        //decrease the program counter by a word size. (due to the Link Return register behaviour)
+        runningThread->t_s.pc -= WORD_SIZE;
         //handle thread accounting
         handle_accounting();
     }
