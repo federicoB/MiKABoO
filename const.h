@@ -100,7 +100,7 @@
 #define TIME_SLICE 5000
 
 /**
- * MiKaBoO pseudo-clock tick time in microseconds.
+ * MiKaBoO pseudoclock tick time in microseconds.
  */
 #define PSEUDO_TICK 100000
 

@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "exception.h"
 #include "scheduler.h"
 #include "utils.h"

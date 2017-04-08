@@ -25,7 +25,7 @@ void scheduler(){
             }
             //else if there are threads and some of them are soft-blocked
             else if(totalThread > 0 && softBlockedThread > 0){
-                //set interval timer as next tick
+                //set interval timer as next pseudoclock tick
                 SET_IT_US(tickTimeLeft);
                 //unmask all interrupts
                 setSTATUS(STATUS_ALL_INT_ENABLE(getSTATUS()));
@@ -84,7 +84,7 @@ void handle_accounting(){
     unsigned int elapsed = TODLO_US() - lastLoadTime;
     //charge the process elapsed time
     runningThread->t_pcb->CPU_time += elapsed;
-    //if time slice execeeded (cast in order to avoid overflow)
+    //if time slice exceed (cast in order to avoid overflow)
     if((long int) timeSliceLeft - (long int) elapsed <= 0){
         //move thread to readyQueue
         thread_enqueue(runningThread, &readyQueue);

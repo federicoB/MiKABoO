@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "ssi.h"
 #include "const.h"
 #include "utils.h"
@@ -25,7 +26,7 @@ void proc_terminate(struct pcb_t* proc){
         //DFS-style recursive call
         proc_terminate(child);
     }
-    //the process has no childern at this point
+    //the process has no children at this point
     //declare an iterator
     struct tcb_t* thread;
     //delete threads of the process
@@ -51,9 +52,9 @@ struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
             process = (struct pcb_t*) CREATENOGOOD;
         }
     }
-    //else if process alllocation failed
+    //else if process allocation failed
     else {
-        //set the process addreass to an error code
+        //set the process address to an error code
         process = (struct pcb_t*) CREATENOGOOD;
     }
     //return the new process

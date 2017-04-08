@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include <arch.h>
 #include "mikabooq.h"
 #include "scheduler.h"

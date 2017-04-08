@@ -1,3 +1,4 @@
+#include <libuarm.h>
 #include "interrupt.h"
 #include "scheduler.h"
 #include "arch.h"
