@@ -38,7 +38,7 @@ void int_handler(){
         //decrease the program counter by a word size. (due to the Link Return register behaviour)
         runningThread->t_s.pc -= WORD_SIZE;
         //handle thread accounting
-        handle_accounting();
+        handle_accounting(runningThread);
     }
     //NOTE: more than one line and more than one device may have raised an interrupt.
     //Cause check is done in ascending priority order to handle the interrupt with highest priority first.

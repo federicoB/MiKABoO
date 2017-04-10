@@ -49,8 +49,9 @@ unsigned int handle_pseudoclock(unsigned int TODLO);
  * Handles threads accounting.
  * Charges CPU time to time to the process.
  * Reduces the time slice of the thread.
+ * @param thread tcb_t*: thread for accounting.
  */
-void handle_accounting();
+void handle_accounting(struct tcb_t* thread);
 
 
 #endif /* SCHEDULER_H */

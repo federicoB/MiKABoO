@@ -13,16 +13,18 @@ void tlb_handler(){
     memcopy((state_t*) TLB_OLDAREA, &(runningThread->t_s), sizeof(state_t));
     //if the process (owner of the running thread) has a TLB trap manager set
     if(runningThread->t_pcb->tlbMgr != NULL){
+        //save thread before passup
+        struct tcb_t* thread = runningThread;
         //pass up the exception
         trap_passup(runningThread->t_pcb->tlbMgr);
+        //handle thread accounting (at the end of the handler)
+        handle_accounting(thread);
     }
     //else (unrecoverable exception)
     else{
         //terminate the process, all its threads, and the whole subtree
         proc_terminate(runningThread->t_pcb);
     }
-    //handle thread accounting (at the end of the handler)
-    handle_accounting();
     //call the scheduler
     scheduler();
 }
@@ -35,16 +37,18 @@ void pgm_trap_handler(){
     memcopy((state_t*) PGMTRAP_OLDAREA, &(runningThread->t_s), sizeof(state_t));
     //if the process (owner of the running thread) has a PGM trap manager set
     if(runningThread->t_pcb->pgmMgr != NULL){
+        //save thread before passup
+        struct tcb_t* thread = runningThread;
         //pass up the exception
         trap_passup(runningThread->t_pcb->pgmMgr);
+        //handle thread accounting (at the end of the handler)
+        handle_accounting(thread);
     }
     //else (unrecoverable exception)
     else{
         //terminate the process, all its threads and the whole subtree
         proc_terminate(runningThread->t_pcb);
     }
-    //handle thread accounting (at the end of the handler)
-    handle_accounting();
     //call the scheduler
     scheduler();
 }
@@ -73,7 +77,7 @@ void sys_bk_handler(){
         PANIC();
     }
     //handle thread accounting (at the end of the handler)
-    handle_accounting();
+    handle_accounting(runningThread);
     //call the scheduler
     scheduler();
 }

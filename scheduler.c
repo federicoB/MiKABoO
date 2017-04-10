@@ -3,7 +3,6 @@
 #include "const.h"
 #include "utils.h"
 
-
 void scheduler(){
     //use unique TODLO
     unsigned int TODLO = TODLO_US();
@@ -79,20 +78,23 @@ unsigned int handle_pseudoclock(unsigned int TODLO){
     return tickTimeLeft;
 }
 
-void handle_accounting(){
+void handle_accounting(struct tcb_t* thread){
     //compute last elapsed time
     unsigned int elapsed = TODLO_US() - lastLoadTime;
     //charge the process elapsed time
-    runningThread->t_pcb->CPU_time += elapsed;
-    //if time slice exceed (cast in order to avoid overflow)
-    if((long int) timeSliceLeft - (long int) elapsed <= 0){
-        //move thread to readyQueue
-        thread_enqueue(runningThread, &readyQueue);
-        //set running thread as NULL
-        runningThread = NULL;
-    }
-    else {
-        //decrease time slice left
-        timeSliceLeft -= elapsed;
+    thread->t_pcb->CPU_time += elapsed;
+    //if thread is running
+    if (thread == runningThread){
+        //if time slice exceed (cast in order to avoid overflow)
+        if((long int) timeSliceLeft - (long int) elapsed <= 0){
+            //move thread to readyQueue
+            thread_enqueue(thread, &readyQueue);
+            //set running thread as NULL
+            runningThread = NULL;
+        }
+        else {
+            //decrease time slice left
+            timeSliceLeft -= elapsed;
+        }
     }
 }
