@@ -81,6 +81,11 @@ struct tcb_t {
     struct pcb_t* t_pcb;
     
     /**
+     * int: error number.
+     */
+    int errno;
+    
+    /**
      * state_t: the cpu state clone.
      */
     state_t t_s ;

@@ -35,6 +35,11 @@
 #define CREATENOGOOD -1
 
 /**
+ * Mnemonic SSI service code: get error number.
+ */
+#define GET_ERRNO 0
+
+/**
  * Mnemonic SSI service code: child process creation.
  */
 #define CREATE_PROCESS 1
@@ -82,17 +87,17 @@
 /**
  * Mnemonic SSI service code: send IO command and wait.
  */
-#define WAIT_FOR_IO 10
+#define DO_IO 10
 
 /**
- * Mnemonic SSI service code: get the process's number.
+ * Mnemonic SSI service code: get the process ID.
  */
-#define GET_PROCESS_N 11
+#define GET_PROCESSID 11
 
 /**
- * Mnemonic SSI service code: get the thread's number.
+ * Mnemonic SSI service code: get the thread ID.
  */
-#define GET_THREAD_N 12
+#define GET_THREADID 12
 
 /**
  * MiKaBoO time slice in microseconds.

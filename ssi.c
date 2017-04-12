@@ -4,17 +4,176 @@
 #include "utils.h"
 #include "uARMconst.h"
 
-void SSI_entry_point(){
-    //TODO: implement
-    
+void SSI_entry_point(){    
     //forever (until killed)
     while(1){
         //pointer to the ssi msg
-        struct ssimsg_t* msg = NULL;
+        //struct ssimsg_t* msg = NULL;
         //receive a message and save the sender
-        struct tcb_t* thread = MsgRecv(NULL, &msg);
-        //TODO: handle service request
-        //TODO: reply to the message (if necessary)
+        //struct tcb_t* thread = MsgRecv(NULL, &msg);
+        void* payload;
+        
+        struct tcb_t* thread = MsgRecv(NULL, &payload);
+
+        unsigned int* service = payload;
+        
+        //case: get error number.
+        if(*service == GET_ERRNO){
+            //get a copy of the error number
+            int errno = thread->errno;
+            //set errno as 0 (success)
+            thread->errno = 0;
+            //Send a message with the error number as payload
+            MsgSend(thread, errno);
+
+        }
+        //case: create a process.
+        else if(*service == CREATE_PROCESS){
+            struct {
+                unsigned int service;
+                state_t thread_state;
+            }* message = payload;
+            //create the process and its first thread with the given state
+            struct pcb_t* proc = proc_create(thread->t_pcb, &(message->thread_state));
+            //first created thread
+            struct tcb_t* createdThread = NULL;
+            //if succeded
+            if(proc != NULL){
+                //set errno as 0 (success)
+                thread->errno = 0;
+                //save created thread
+                createdThread = proc_firstthread(proc);
+            }
+            //otherwise (error)
+            else{
+                //TODO: set errno as error
+            }
+            //send the reply with the created thread as payload (or NULL if failed)
+            MsgSend(thread, createdThread);
+        }
+        //case: create a thread.
+        else if(*service == CREATE_THREAD){
+            struct {
+                unsigned int service;
+                state_t thread_state;
+            }* message = payload;
+            //create the thread with the given state
+            struct tcb_t* createdThread = thread_create(thread->t_pcb, &(message->thread_state));
+            //if succeded
+            if(createdThread != NULL){
+                //set errno as 0 (success)
+                thread->errno = 0;
+            }
+            //otherwise (error)
+            else{
+                //TODO: set errno as error
+            }
+            //send the reply with the created thread as payload (or NULL if failed)
+            MsgSend(thread, createdThread);
+        }
+        //case: terminate the process
+        else if(*service == TERMINATE_PROCESS){
+            //terminate the process
+            proc_terminate(thread->t_pcb);
+        }
+        //case: terminate the thread
+        else if(*service == TERMINATE_THREAD){
+            //if is the last thread of the process
+            if(thread->t_pcb->p_threads.next == thread->t_pcb->p_threads.prev){
+                //terminate the whole process
+                proc_terminate(thread->t_pcb);
+            }
+            //otherwise (more than 1 thread)
+            else{
+                //terminate the thread
+                thread_terminate(thread);
+            }
+        }
+        else if(*service == SETPGMMGR){
+            //TODO: compress code, avoid copy-paste.
+            struct {
+                unsigned int service;
+                struct tcb_t* manager;
+            }* message = payload;
+            //set the manager
+            int result = set_PGM_manager(thread, message->manager);
+            //if succeeded
+            if(result == 0){
+                //set errno as 0 (success)
+                thread->errno = 0;
+                //send the reply with the given manager as payload
+                MsgSend(thread, message->manager);
+            }
+        }
+        //case: set TLB trap manager.
+        else if(*service == SETTLBMGR){
+            //TODO: compress code, avoid copy-paste.
+            struct {
+                unsigned int service;
+                struct tcb_t* manager;
+            }* message = payload;
+            //set the manager
+            int result = set_TLB_manager(thread, message->manager);
+            //if succeeded
+            if(result == 0){
+                //set errno as 0 (success)
+                thread->errno = 0;
+                //send the reply with the given manager as payload
+                MsgSend(thread, message->manager);
+            }
+        }
+        //case: set SYS/BK trap manager.
+        else if(*service == SETSYSMGR){
+            //TODO: compress code, avoid copy-paste.
+            struct {
+                unsigned int service;
+                struct tcb_t* manager;
+            }* message = payload;
+            //set the manager
+            int result = set_SYSBK_manager(thread, message->manager);
+            //if succeeded
+            if(result == 0){
+                //set errno as 0 (success)
+                thread->errno = 0;
+                //send the reply with the given manager as payload
+                MsgSend(thread, message->manager);
+            }
+        }
+        //case: get CPU execution time.
+        else if(*service == GETCPUTIME){
+            //set errno as 0 (success)
+            thread->errno = 0;
+            //Send a message with the CPU time as payload
+            MsgSend(thread, thread->t_pcb->CPU_time);
+        }
+        //case:wait for next pseudoclick tick
+        else if(*service == WAIT_FOR_CLOCK){
+            //TODO: handle.
+        }
+        //case: do IO and wait.
+        else if(*service == DO_IO){
+            //TODO: handle.
+        }
+        //case: get process ID.
+        else if(*service == GET_PROCESSID){
+            //set errno as 0 (success)
+            thread->errno = 0;
+            //Send a message with the process ID as payload
+            MsgSend(thread, thread->t_pcb);
+        }
+        //case: get thread ID.
+        else if(*service == GET_THREADID){
+            //set errno as 0 (success)
+            thread->errno = 0;
+            //Send a message with the process ID as payload
+            MsgSend(thread, thread);
+        }
+        //default: error.
+        else{
+            //print an error messsage and panic
+            tprint("Invalid SSI service\n");
+            PANIC();
+        }
     }
 }
 
@@ -45,17 +204,17 @@ struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
     //allocate a new process and if succeeded
     if ((process = proc_alloc(parent)) != NULL) {
         //allocate a new thread for the new process and if failed
-        if (thread_create(process, state) == (struct tcb_t*) CREATENOGOOD) {
+        if (thread_create(process, state) == NULL) {
             //delete the process
             proc_delete(process);
             //set the process address to an error code
-            process = (struct pcb_t*) CREATENOGOOD;
+            process = NULL;
         }
     }
     //else if process allocation failed
     else {
         //set the process address to an error code
-        process = (struct pcb_t*) CREATENOGOOD;
+        process = NULL;
     }
     //return the new process
     return process;
@@ -110,8 +269,8 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
     }
     //else if fails
     else{
-        //set the thread address as CREATENOGOOD
-        thread = (struct tcb_t*) CREATENOGOOD;
+        //set the thread address as NULL
+        thread = NULL;
     }
     //return the result
     return thread;

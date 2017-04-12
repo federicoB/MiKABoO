@@ -45,6 +45,8 @@ struct tcb_t* thread_alloc(struct pcb_t* process){
         //TODO: choose how to init status ecc...
         //save the parent process
         newTCB->t_pcb = process;
+        //init errno as "no error"
+        newTCB->errno = 0;
     }//else leave as NULL
     //return the result
     return newTCB;
