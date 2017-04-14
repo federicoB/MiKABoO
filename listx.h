@@ -94,4 +94,9 @@ static inline struct list_head *list_prev(const struct list_head *current)
 	&pos->member != (head);        \
 	pos = container_of(pos->member.prev, typeof(*pos), member))
 
+#define list_for_each_entry_safe(pos, n, head, member)			\
+	for (pos = container_of((head)->next, typeof(*pos), member),	\
+	n = container_of((pos)->member.next, typeof(*pos), member);			\
+	&pos->member != (head); 					\
+	pos = n, n = container_of((n)->member.next, typeof(*pos), member))
 #endif

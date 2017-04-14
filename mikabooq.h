@@ -114,6 +114,11 @@ struct tcb_t {
      * list_head: entry point of the pending messages list.
      */
     struct list_head t_msgq;
+    
+    /**
+     * list_head: list of sent messages not "read" yet.
+     */
+    struct list_head t_sentmsg;
 };
 
 /**
@@ -136,6 +141,11 @@ struct msg_t {
      * Used to add this msg_t to a list (used as queue).
      */
     struct list_head m_next;
+
+    /**
+     * list_head: link (or "hook") to the next sent message in tcb_t list.
+     */
+    struct list_head m_tnext;
 };
 
 //processes management functions
@@ -258,4 +268,9 @@ int msgq_add(struct tcb_t* sender, struct tcb_t* destination, uintptr_t value);
  */
 int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value);
 
+/**
+ * Free the message.
+ * @param msg msg_t*: pointer to msg to free.
+ */
+void msg_free(struct msg_t* msg);
 #endif

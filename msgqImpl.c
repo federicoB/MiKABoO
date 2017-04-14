@@ -43,6 +43,8 @@ int msgq_add(struct tcb_t* sender, struct tcb_t* destination, uintptr_t value){
         newMsg->m_value = value;
         //enqueue the message (tail add to the list)
         list_add_tail(&(newMsg->m_next), &(destination->t_msgq));
+        //add to the list of unread sent messages
+        list_add(&(newMsg->m_tnext), &(sender->t_sentmsg));
         //set the result as success
         result = 0;
     }
@@ -92,10 +94,8 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
         if(selectedMSG != NULL){
             //get and save the message value
             *value = selectedMSG->m_value;
-            //delete the message from the queue
-            list_del(&(selectedMSG->m_next));
-            //add the message to the message free list
-            list_add(&(selectedMSG->m_next), &freeMSG);
+            //free the message
+            msg_free(selectedMSG);
             //set result as zero (success)
             result = 0;
         }//else leave the result as error
@@ -111,4 +111,13 @@ struct msg_t* extractMSG(){
     list_del(&(extractedMSG->m_next));	
     //return the message
     return extractedMSG;
+}
+
+void msg_free(struct msg_t* msg){
+    //delete the message from the queue
+    list_del(&(msg->m_next));
+    //delete the message from the list of sent messages in tcb
+    list_del(&(msg->m_tnext));
+    //add the message to the message free list
+    list_add(&(msg->m_next), &freeMSG);
 }
