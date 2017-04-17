@@ -53,6 +53,8 @@ void sched_init(){
     INIT_LIST_HEAD(&readyQueue);
     //initialize threads wait queue
     INIT_LIST_HEAD(&waitQueue);
+    //initialize pseudoclock list
+    INIT_LIST_HEAD(&pseudoClockList);
     //initialize the running thread pointer as NULL
     runningThread = NULL;
     //initialize the number of threads to zero
@@ -72,7 +74,15 @@ unsigned int handle_pseudoclock(unsigned int TODLO){
         lastTickTime += PSEUDO_TICK;
         //update tick time left
         tickTimeLeft = PSEUDO_TICK - (TODLO - lastTickTime);
-        //TODO: handle tick behaviour
+        //declare iterators
+        struct tcb_t* thread;
+        struct tcb_t* thread_next;
+        //foreach thread in pseudoclock list
+        list_for_each_entry_safe(thread, thread_next, &pseudoClockList, t_pseudo){
+            //TODO: send a fake message to the thread in order to wake him up
+            //remove the thread from pseudoclock waiting list
+            list_del(&(thread->t_pseudo));
+        }
     }
     //return the time
     return tickTimeLeft;

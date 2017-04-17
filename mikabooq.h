@@ -111,6 +111,11 @@ struct tcb_t {
     struct list_head t_sched;
     
     /**
+     * list_head: link (or "hook") to other elements in pseudoclock list.
+     */
+    struct list_head t_pseudo;
+    
+    /**
      * list_head: entry point of the pending messages list.
      */
     struct list_head t_msgq;

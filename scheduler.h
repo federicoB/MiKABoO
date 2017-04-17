@@ -3,22 +3,44 @@
 
 #include "mikabooq.h"
 
-//ready threads queue
+/**
+ * list_head: ready threads queue.
+ */
 struct list_head readyQueue;
 
-//waiting threads queue
+/**
+ * list_head: waiting threads queue.
+ */
 struct list_head waitQueue;
 
-//running thread
+/**
+ * list_head: list of threads waiting for pseudoclock (entry point).
+ */
+struct list_head pseudoClockList;
+
+/**
+ * tcb_t*: current running thread.
+ */
 struct tcb_t* runningThread;
 
-//total number of threads
+/**
+ * int: total number of threads
+ */
 int totalThread;
 
-//number of soft-blocked threads
+/**
+ * int: number of soft-blocked threads
+ */
 int softBlockedThread;
 
+/**
+ * Initialize scheduler data structures.
+ */
 void sched_init();
+
+/**
+ * Schedule!
+ */
 void scheduler();
 
 /**
