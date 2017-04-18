@@ -25,5 +25,13 @@ void sys_bk_handler();
  */
 void trap_passup(struct tcb_t* manager);
 
+/**
+ * Enqueues the message to the recipient and wakes him up if necessary.
+ * @param src tcb_t*: sender of the message.
+ * @param dst tcb_t*: recipient of the message.
+ * @param msg uintptr_t: message payload.
+ * @return int: 0 in case of success or -1 in case of failure (e.g.: no more msg_t are available).
+ */
+int do_send(struct tcb_t* src, struct tcb_t* dst, uintptr_t msg);
 #endif /* EXCEPTION_H */
 

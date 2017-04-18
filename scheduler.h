@@ -59,6 +59,11 @@ unsigned int timeSliceLeft;
 unsigned int lastTickTime;
 
 /**
+ * unsigned int: total number of ticks since the system boot.
+ */
+unsigned int totalTicks;
+
+/**
  * Handles pseudoclock ticks.
  * If pseudoclock tick happened, wakes clock-waiting threads up.
  * Returns time until next pseudoclock tick.

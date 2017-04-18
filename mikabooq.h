@@ -71,6 +71,11 @@ struct pcb_t {
 #define T_STATUS_W4MSG 4
 
 /**
+ * int: status "thread waiting for trap".
+ */
+#define T_STATUS_W4TRAP 5
+
+/**
  * A thread control block.
  */
 struct tcb_t {

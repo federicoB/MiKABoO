@@ -85,22 +85,17 @@ void sys_bk_handler(){
 void trap_passup(struct tcb_t* manager){
     //send a message to the manager with the cause as payload
     //and the offending thread as sender. Save the return value.
-    int succeeded = msgq_add(runningThread, manager, runningThread->t_s.CP15_Cause);
+    int succeeded = do_send(runningThread, manager, runningThread->t_s.CP15_Cause);
     //if send succeeded
     if(succeeded == 0){
         //enqueue in wait queue
         thread_enqueue(runningThread, &waitQueue);
         //increase soft blocked threads number
         softBlockedThread++;
-
-        //TODO: set status as wait for trap
-
+        //set status as wait for trap
+        runningThread->t_status = T_STATUS_W4TRAP;
         //remove the thread from running
         runningThread = NULL;
-        //if the manager is not in ready queue
-        if(manager->t_status != T_STATUS_READY){
-            //TODO: wake manager up
-        }
     }
     //else (message limit exceeded)
     else{
@@ -108,4 +103,22 @@ void trap_passup(struct tcb_t* manager){
         tprint("CAN'T PASS UP TRAP: send failed\n");
         PANIC();
     }
+}
+
+int do_send(struct tcb_t* src, struct tcb_t* dst, uintptr_t msg){
+    //enqueue the message and save the result
+    int result = msgq_add(src, dst, msg);
+    //if waiting for message and this message is suitable
+    if((dst->t_status == T_STATUS_W4MSG) && ((dst->t_wait4sender == NULL) || (dst->t_wait4sender == src))){
+        //remove dst from the wait queue
+        list_del(&(dst->t_sched));
+        //decrease soft blocked threads number
+        softBlockedThread--;
+        //move thread to readyQueue
+        thread_enqueue(dst, &readyQueue);
+        //set dst status to ready
+        dst->t_status = T_STATUS_READY;
+    }
+    //return the result of message enqueue
+    return result;
 }

@@ -2,6 +2,8 @@
 #include "scheduler.h"
 #include "const.h"
 #include "utils.h"
+#include "exception.h"
+#include "ssi.h"
 
 void scheduler(){
     //use unique TODLO
@@ -63,6 +65,8 @@ void sched_init(){
     softBlockedThread = 0;
     //initialize last tick time to time of day (lower bits)
     lastTickTime = TODLO_US();
+    //initialize the number of total ticks to zero
+    totalTicks = 0;
 }
 
 unsigned int handle_pseudoclock(unsigned int TODLO){
@@ -74,12 +78,16 @@ unsigned int handle_pseudoclock(unsigned int TODLO){
         lastTickTime += PSEUDO_TICK;
         //update tick time left
         tickTimeLeft = PSEUDO_TICK - (TODLO - lastTickTime);
+        //increment number of ticks
+        totalTicks++;
         //declare iterators
         struct tcb_t* thread;
         struct tcb_t* thread_next;
         //foreach thread in pseudoclock list
         list_for_each_entry_safe(thread, thread_next, &pseudoClockList, t_pseudo){
-            //TODO: send a fake message to the thread in order to wake him up
+            //send a fake message to the thread in order to wake him up
+            //(send the number of total ticks as payload)
+            do_send(SSI_addr, thread, totalTicks);
             //remove the thread from pseudoclock waiting list
             list_del(&(thread->t_pseudo));
         }
