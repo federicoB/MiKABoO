@@ -4,6 +4,9 @@
 #include "utils.h"
 #include "uARMconst.h"
 #include "ssi.h"
+#include "const.h"
+#include "mikabooq.h"
+#include <stdint.h>
 
 void tlb_handler(){
     //TODO: implement
@@ -63,11 +66,128 @@ void sys_bk_handler(){
     unsigned int cause = CAUSE_EXCCODE_GET(runningThread->t_s.CP15_Cause);
     //if the exception is a syscall
     if(cause == EXC_SYSCALL){
-        //TODO: handle
+        //get system call number
+        unsigned int sysCallNumber = runningThread->t_s.a1;
+        //if this is a recognized sys call
+        if(sysCallNumber == SEND || sysCallNumber == RECV){
+            //if in kernel mode
+            if((runningThread->t_s.cpsr & STATUS_SYS_MODE) == STATUS_SYS_MODE){
+                //save the running thread
+                struct tcb_t* thread = runningThread;
+                //if the system call is a send
+                if(sysCallNumber == SEND){
+                    //get the destination
+                    struct tcb_t* dst = (struct tcb_t*)(runningThread->t_s.a2);
+                    //get the payload
+                    uintptr_t payload = (uintptr_t)(runningThread->t_s.a3);
+                    //if this is a reply from a manager
+                    if(dst->t_pcb->pgmMgr == runningThread ||
+                        dst->t_pcb->tlbMgr == runningThread ||
+                        dst->t_pcb->sysMgr == runningThread){
+                        //if the message is TRAP_CONTINUE
+                        if(payload == TRAP_CONTINUE){
+                            //remove dst from the wait queue
+                            list_del(&(dst->t_sched));
+                            //decrease soft blocked threads number
+                            softBlockedThread--;
+                            //move thread to readyQueue
+                            thread_enqueue(dst, &readyQueue);
+                            //set dst status to ready
+                            dst->t_status = T_STATUS_READY;
+                        }
+                        //else if the message is a TRAP_TERMINATE
+                        else {
+                            //terminate the thread
+                            thread_terminate(dst);
+                        }
+                    }
+                    //else if a normal message
+                    else{
+                        //send the message (and wake the thread if necessary)
+                        do_send(runningThread, dst, payload);
+                    }
+                    //increase the program counter by a word
+                    runningThread->t_s.pc += WORD_SIZE;
+                }
+                //if the system call is a receive
+                else{
+                    //get expected sender (or NULL if any message)
+                    struct tcb_t* sender = (struct tcb_t*)(runningThread->t_s.a2);
+                    //get the payload pointer
+                    uintptr_t* payloadP = (uintptr_t*)(runningThread->t_s.a3);
+                    //get the message from the queue and save the result
+                    int succeeded = msgq_get(&sender, runningThread, payloadP);
+                    //if succeeded
+                    if(succeeded == 0){
+                        //increase the program counter by a word
+                        runningThread->t_s.pc += WORD_SIZE;
+                    }
+                    //otherwise
+                    else{
+                        //NOTE: do not increment. (RECV will be called again)
+                        //increment soft blocked threads number
+                        softBlockedThread++;
+                        //move thread to waitQueue
+                        thread_enqueue(runningThread, &waitQueue);
+                        //set thread status to wait for message
+                        runningThread->t_status = T_STATUS_W4MSG;
+                        //set expected sender
+                        runningThread->t_wait4sender = sender;
+                        //set running thread to NULL
+                        runningThread = NULL;
+                    }
+                }
+                //handle accounting
+                handle_accounting(thread);
+            }
+            //else if in user mode
+            else{
+                //set the cause as reserved instruction
+                runningThread->t_s.CP15_Cause = CAUSE_EXCCODE_SET(runningThread->t_s.CP15_Cause, EXC_RESERVEDINSTR);
+                //if there is PGM trap manager set
+                if(runningThread->t_pcb->pgmMgr != NULL){
+                    //pass up
+                    trap_passup(runningThread->t_pcb->pgmMgr);
+                    //handle accounting
+                    handle_accounting(runningThread);
+                }
+                //otherwise
+                else{
+                    //terminate the process
+                    proc_terminate(runningThread->t_pcb);
+                }
+            }
+        }
+        //foreign sys call
+        else{
+            //if there is SYS/BK manager set
+            if(runningThread->t_pcb->sysMgr != NULL){
+                //pass up
+                trap_passup(runningThread->t_pcb->sysMgr);
+                //handle accounting
+                handle_accounting(runningThread);
+            }
+            //else if there is PGM trap manager set
+            else if(runningThread->t_pcb->pgmMgr != NULL){
+                //pass up
+                trap_passup(runningThread->t_pcb->pgmMgr);
+                //handle accounting
+                handle_accounting(runningThread);
+            }
+            //otherwise
+            else{
+                //terminate the process
+                proc_terminate(runningThread->t_pcb);
+            }
+        }
+
     }
     //else if the exception is a breakpoint
     else if (cause == EXC_BREAKPOINT){
         //TODO: handle
+        
+        //handle thread accounting
+        handle_accounting(runningThread);
     }
     //else if something went wrong
     else{
@@ -76,8 +196,6 @@ void sys_bk_handler(){
         //panic
         PANIC();
     }
-    //handle thread accounting (at the end of the handler)
-    handle_accounting(runningThread);
     //call the scheduler
     scheduler();
 }

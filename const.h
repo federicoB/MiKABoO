@@ -135,6 +135,16 @@
 #define TERM_WRITE_COMMAND 0x0000000C
 
 /**
+ * Trap continue message
+ */
+#define TRAP_CONTINUE 1
+
+/**
+ * Trap terminate message
+ */
+#define TRAP_TERMINATE 0
+
+/**
  * Sends a message to the destination with the given payload.
  * Implemented with a system call.
  * @param destination tcb_t*: pointer to the destination thread.
