@@ -150,6 +150,7 @@ void SSI_entry_point(){
         else if(*service == WAIT_FOR_CLOCK){
             //insert the thread inside the pseudoclock list
             wait_for_clock(thread);
+            //NOTE: a message reply will be triggered asyncronously by the kernel.
         }
         //case: do IO and wait.
         else if(*service == DO_IO){
