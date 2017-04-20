@@ -96,6 +96,12 @@ int set_TLB_manager(struct tcb_t* applicant, struct tcb_t* manager);
 int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager);
 
 /**
+ * Suspends the given thread's execution until the next pseudoclock's tick.
+ * @param thread tcb_t*: thread requesting the service.
+ */
+void wait_for_clock(struct tcb_t* thread);
+
+/**
  * Returns the CPU execution time of the given process.
  * @param applicant pcb_t*: the process.
  * @return unsigned int: the time.

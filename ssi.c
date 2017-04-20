@@ -148,7 +148,8 @@ void SSI_entry_point(){
         }
         //case:wait for next pseudoclick tick
         else if(*service == WAIT_FOR_CLOCK){
-            //TODO: handle.
+            //insert the thread inside the pseudoclock list
+            wait_for_clock(thread);
         }
         //case: do IO and wait.
         else if(*service == DO_IO){
@@ -282,6 +283,11 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
     }
     //return the result
     return thread;
+}
+
+void wait_for_clock(struct tcb_t* thread){
+    //add the thread to the pseudoclock list
+    thread_enqueue(thread, &pseudoClockList);
 }
 
 unsigned int get_CPU_time(struct pcb_t* applicant){
