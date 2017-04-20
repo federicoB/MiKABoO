@@ -121,6 +121,8 @@ void sys_bk_handler(){
                     if(succeeded == 0){
                         //increase the program counter by a word
                         runningThread->t_s.pc += WORD_SIZE;
+                        //save sender in a0
+                        runningThread->t_s.a1 = (unsigned int)sender;
                     }
                     //otherwise
                     else{
