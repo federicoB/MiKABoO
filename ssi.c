@@ -245,11 +245,11 @@ void thread_terminate(struct tcb_t* thread){
         //reset the sender as NULL
         sender = NULL;
     }
-    //handle messages with this thread as a sender
+    //handle not yet read messages with this thread as a sender
     //declare iterators
     struct msg_t* msg_it;
     struct msg_t* msg_it_next;
-    //foreach sent message (use safe macro)
+    //foreach sent but not yet read message (use safe macro)
     list_for_each_entry_safe(msg_it, msg_it_next, &(thread->t_sentmsg), m_tnext){
         //free the message
         msg_free(msg_it);
