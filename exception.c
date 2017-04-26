@@ -226,18 +226,21 @@ void trap_passup(struct tcb_t* manager){
 }
 
 int do_send(struct tcb_t* src, struct tcb_t* dst, uintptr_t msg){
-    //enqueue the message and save the result
-    int result = msgq_add(src, dst, msg);
-    //if waiting for message and this message is suitable
-    if((dst->t_status == T_STATUS_W4MSG) && ((dst->t_wait4sender == NULL) || (dst->t_wait4sender == src))){
-        //remove dst from the wait queue
-        list_del(&(dst->t_sched));
-        //decrease soft blocked threads number
-        softBlockedThread--;
-        //move thread to readyQueue
-        thread_enqueue(dst, &readyQueue);
-        //set dst status to ready
-        dst->t_status = T_STATUS_READY;
+    //declare a variable for storing the function outcome
+    int result;
+    //if enqueuing the message and saving the result is successful
+    if ((result=msgq_add(src, dst, msg))==0) {
+        //if the destination thread is waiting for a message
+        if ((dst->t_status == T_STATUS_W4MSG) && ((dst->t_wait4sender == NULL) || (dst->t_wait4sender == src))) {
+            //remove dst from the wait queue
+            list_del(&(dst->t_sched));
+            //decrease soft blocked threads number
+            softBlockedThread--;
+            //move thread to readyQueue
+            thread_enqueue(dst, &readyQueue);
+            //set dst status to ready
+            dst->t_status = T_STATUS_READY;
+        }
     }
     //return the result of message enqueue
     return result;
