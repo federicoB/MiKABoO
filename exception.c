@@ -106,8 +106,6 @@ void sys_bk_handler(){
                         //send the message (and wake the thread if necessary)
                         do_send(runningThread, dst, payload);
                     }
-                    //increase the program counter by a word
-                    runningThread->t_s.pc += WORD_SIZE;
                 }
                 //if the system call is a receive
                 else{
@@ -119,14 +117,13 @@ void sys_bk_handler(){
                     int succeeded = msgq_get(&sender, runningThread, payloadP);
                     //if succeeded
                     if(succeeded == 0){
-                        //increase the program counter by a word
-                        runningThread->t_s.pc += WORD_SIZE;
                         //save sender in a0
                         runningThread->t_s.a1 = (unsigned int)sender;
                     }
                     //otherwise
                     else{
-                        //NOTE: do not increment. (RECV will be called again)
+                        //decrement stack pointer so recv will be called again.
+                        runningThread->t_s.pc -= WORD_SIZE;
                         //increment soft blocked threads number
                         softBlockedThread++;
                         //move thread to waitQueue
