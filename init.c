@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "exception.h"
 #include "interrupt.h"
+#include "ssi.h"
 
 //declare an extern test function
 extern void test();
@@ -42,23 +43,33 @@ int main(int argc, char** argv[]) {
     setHandler(TLB_NEWAREA, (memaddress) tlb_handler);
     //set interrupt handler
     setHandler(INT_NEWAREA, (memaddress) int_handler);
-    //create a new process with the root process as parent
+    //create a new process for the ssi with the root process as parent
     struct pcb_t* newProc = proc_alloc(rootPCB);
+    //create the ssi thread for the previously created process and save globally its address
+    SSI_addr = thread_alloc(newProc);
+    //enable interrupts and set kernel mode
+    SSI_addr->t_s.cpsr = STATUS_ALL_INT_ENABLE(SSI_addr->t_s.cpsr) | STATUS_SYS_MODE;
+    //set the correct stack pointer (Top of the memory - size of a frame, leaving enough space for the kernel stack)
+    SSI_addr->t_s.sp = RAM_TOP - FRAME_SIZE;
+    //set program counter as the address of the first instruction of the test program
+    SSI_addr->t_s.pc = (memaddress) SSI_entry_point;
+    //enqueue the thread in the ready queue
+    thread_enqueue(SSI_addr, &readyQueue);
+    //create another new process with the root process as parent
+    newProc = proc_alloc(rootPCB);
     //create a thread for the previously created process
     struct tcb_t* thread = thread_alloc(newProc);
     //enable interrupts and set kernel mode
     thread->t_s.cpsr = STATUS_ALL_INT_ENABLE(thread->t_s.cpsr) | STATUS_SYS_MODE;
-    //set the correct stack pointer (Top of the memory - size of a frame, leaving enough space for the kernel stack)
-    thread->t_s.sp = RAM_TOP - FRAME_SIZE;
+    //set the correct stack pointer (Top of the memory - 2 * size of a frame, leaving enough space for the kernel and ssi stack)
+    thread->t_s.sp = RAM_TOP - (2*FRAME_SIZE);
     //set program counter as the address of the first instruction of the test program
     thread->t_s.pc = (memaddress) test;
-    //increase the number of thread
-    totalThread++;
+    //increase the total number of thread
+    totalThread+=2;
     //enqueue the thread in the ready queue
     thread_enqueue(thread, &readyQueue);
-    
-    //TODO: start the SSI and save its address.
-    
+
     //call the scheduler
     scheduler();
     //this point should never be reached

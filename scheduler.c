@@ -14,8 +14,8 @@ void scheduler(){
     if(runningThread == NULL){
         //if the ready queue is empty
         if(list_empty(&readyQueue)){
-            //if there is no thread
-            if(totalThread == 0){
+            //if there is only the ssi thread
+            if(totalThread == 1){
                 //halt the system
                 HALT();
             }
