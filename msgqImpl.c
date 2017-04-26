@@ -80,7 +80,7 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
             struct msg_t* curMessage;
             //while there is an other message and the current message sender is not
             //the given one. (implemented using the "for each entry" macro and a break)
-            list_for_each_entry(curMessage,list_next(&(destination->t_msgq)), m_next) {
+            list_for_each_entry(curMessage,&(destination->t_msgq), m_next) {
                 //if the sender of the current message equals the given sender
                 if(curMessage->m_sender == *sender){
                     //set the selected message as the current one
