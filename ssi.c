@@ -2,9 +2,12 @@
 #include "ssi.h"
 #include "const.h"
 #include "utils.h"
+#include "interrupt.h"
 #include "uARMconst.h"
 
-void SSI_entry_point(){    
+int do_io_ssi(struct tcb_t *sender, void *payload);
+
+void SSI_entry_point(){
     //forever (until killed)
     while(1){
         //pointer to the ssi msg
@@ -12,11 +15,10 @@ void SSI_entry_point(){
         //receive a message and save the sender
         //struct tcb_t* thread = MsgRecv(NULL, &msg);
         void* payload;
-        
+
         struct tcb_t* thread = MsgRecv(NULL, &payload);
 
         unsigned int* service = payload;
-        
         //case: get error number.
         if(*service == GET_ERRNO){
             //get a copy of the error number
@@ -155,6 +157,7 @@ void SSI_entry_point(){
         //case: do IO and wait.
         else if(*service == DO_IO){
             //TODO: handle.
+            do_io_ssi(thread, payload);
         }
         //case: get process ID.
         else if(*service == GET_PROCESSID){
@@ -351,6 +354,72 @@ int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager){
     }
     //return the result
     return result;
+}
+
+int getDeviceLineNumber(unsigned int address,unsigned int* lineNumber, unsigned int* deviceNumber) {
+    //devices registers start from address 64. Subtract it.
+    int signedAddress = address-64;
+    //first subtract all below lineNumber address and then all below deviceNumber address
+    //initialize lineNumber number to 0
+    *lineNumber=0;
+    //while the address minus 128 (space between two different lineNumber register) is >=0
+    while (signedAddress-128>=0) {
+        //increase lineNumber number
+        (*lineNumber)++;
+        //subtract 128
+        signedAddress-=128;
+    }
+    //initialize deviceNumber number to 0
+    *deviceNumber=0;
+    //while the remaining address minus 16 (the space between two different lines address) is >=0
+    while (signedAddress-16>=0) {
+        //increase deviceNumber address
+        (*deviceNumber)++;
+        //subtract 16
+        signedAddress-=16;
+    }
+    //if signed address is not 0 the given address is not a lineNumber base address
+    //so return an error code
+    return 0;
+}
+
+int do_io_ssi(struct tcb_t *sender, void *payload) {
+    //declare a common structure among the messages
+    struct {
+        //the requested ssi service
+        unsigned int service;
+        //the address of the device command area
+        unsigned int* deviceAddress;
+        //the requested command
+        unsigned int command;
+    } *message = payload;
+    //declare a variable for the device base address, device number and line number
+    unsigned int baseAddress, deviceNumber, lineNumber;
+    //get device and line number and save the function result
+    int result = getDeviceLineNumber((unsigned int)message->deviceAddress, &lineNumber, &deviceNumber);
+    //if the requested device is a terminal
+    if ((message->deviceAddress) >= (memaddress*) DEV_REG_ADDR(IL_TERMINAL, 0)
+        && (message->deviceAddress) <= (memaddress*) DEV_REG_ADDR(IL_TERMINAL, 7) + TERM_WRITE_COMMAND) {
+
+    } else //the requested device is a disk, tape, network or a printer
+    {
+        //declare a pointer for get data1 info
+        unsigned int *data1;
+        //copy the value located 4 byte ahead of command area into a correspoind area of device memory register
+        *(message->deviceAddress+1) = *(&(message->command) + 1);
+        //if is an ethernet device
+        if (((message->deviceAddress) >= (memaddress *) DEV_REG_ADDR(IL_ETHERNET, 0) + GENERIC_COMMAND)
+            && (message->deviceAddress) <= (memaddress *) DEV_REG_ADDR(IL_ETHERNET, 7) + GENERIC_COMMAND) {
+            //copy the value located 8 byte ahead of command area into a correspoind area of device memory register
+            *(message->deviceAddress+2) = *(&(message->command) + 2);
+        }
+    }
+    threadsWaitingDevices[deviceNumber][lineNumber]=sender;
+    //set command into the correct area of device memory register
+    //the device now will execute the request
+    *(message->deviceAddress) = message->command;
+    //set the error number of sender thread to 0
+    sender->errno = 0;
 }
 
 void SSIRequest(unsigned int service, unsigned int payload, unsigned int* reply){

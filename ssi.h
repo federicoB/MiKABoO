@@ -102,6 +102,15 @@ int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager);
 void wait_for_clock(struct tcb_t* thread);
 
 /**
+ * Get device number and interrupt line number given base address of a device memory register.
+ * @param address unsigned int: base address
+ * @param lineNumber unsigned int*: a pointer to an area where the device number will be saved
+ * @param deviceNumber unsigned int*: a pointer to an area where the line number will be saved
+ * @return 1 if address is a correct base address, -1 otherwise
+ */
+int getDeviceLineNumber(unsigned int address,unsigned int* lineNumber, unsigned int* deviceNumber);
+
+/**
  * Returns the CPU execution time of the given process.
  * @param applicant pcb_t*: the process.
  * @return unsigned int: the time.

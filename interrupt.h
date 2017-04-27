@@ -1,6 +1,10 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
+#include "listx.h"
+
+struct tcb_t* threadsWaitingDevices[8][5];
+
 /**
  * Returns the position of first least significant bit
  * that equals 1 in the given interrupt line bitmap.

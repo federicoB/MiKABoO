@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "uARMconst.h"
 #include "const.h"
+#include "exception.h"
+#include "ssi.h"
 
 int get_highest_priority_interrupt(unsigned int* bitmap){
     //power of 2 bit mask
@@ -134,9 +136,19 @@ void standard_device_handler(int lineNumber){
         //get the status register
         status = (unsigned int*) DEV_REG_ADDR(lineNumber, device);
     }
-    
-    //TODO: send a message to the SSI (wake up)
-    
+    //map the line number to matrix index
+    //The first three lines (IPI,CPUTIMER,TIMER) are unused in pending interrupt matrix
+    lineNumber -= 3;
+    //get the i/o requesting thread from the data structure used to keep track of pending request
+    struct tcb_t* requestingThread = threadsWaitingDevices[device][lineNumber];
+    //if there is a thread waiting for the device
+    if (requestingThread!=NULL) {
+        //wake up the requesting thread using a message
+        //The thread is waiting from the ssi so it will pretend to be the ssi
+        do_send(SSI_addr, requestingThread, (uintptr_t) status);
+        //reset the element of the matrix
+        threadsWaitingDevices[device][lineNumber] = NULL;
+    }
     //send ack to device (set ack in commend register)
     *command = DEV_C_ACK;
 }
