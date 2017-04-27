@@ -33,10 +33,10 @@ void SSI_entry_point(){
         else if(*service == CREATE_PROCESS){
             struct {
                 unsigned int service;
-                state_t thread_state;
+                state_t* thread_state;
             }* message = payload;
             //create the process and its first thread with the given state
-            struct pcb_t* proc = proc_create(thread->t_pcb, &(message->thread_state));
+            struct pcb_t* proc = proc_create(thread->t_pcb, message->thread_state);
             //first created thread
             struct tcb_t* createdThread = NULL;
             //if succeded
@@ -57,10 +57,10 @@ void SSI_entry_point(){
         else if(*service == CREATE_THREAD){
             struct {
                 unsigned int service;
-                state_t thread_state;
+                state_t* thread_state;
             }* message = payload;
             //create the thread with the given state
-            struct tcb_t* createdThread = thread_create(thread->t_pcb, &(message->thread_state));
+            struct tcb_t* createdThread = thread_create(thread->t_pcb, message->thread_state);
             //if succeded
             if(createdThread != NULL){
                 //set errno as 0 (success)

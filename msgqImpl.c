@@ -92,8 +92,11 @@ int msgq_get(struct tcb_t** sender, struct tcb_t* destination, uintptr_t* value)
         }
         //if a message has been selected
         if(selectedMSG != NULL){
-            //get and save the message value
-            *value = selectedMSG->m_value;
+            //if value is a valid address that can store the message value
+            if(value != NULL){
+                //get and save the message value
+                *value = selectedMSG->m_value;	
+            }
             //free the message
             msg_free(selectedMSG);
             //set result as zero (success)
