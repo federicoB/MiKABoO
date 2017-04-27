@@ -230,7 +230,20 @@ void thread_terminate(struct tcb_t* thread){
     if(thread->t_status != T_STATUS_READY){
         //decrease softblock
         softBlockedThread--;
-        //TODO: update wait structures if necessary (e.g.: IO)
+        //update device wait structures
+        //declare matrix iterators
+        int i,j;
+        //for each row
+        for (i=0;i<8;i++) {
+            //for each column
+            for (j=0;j<5;j++) {
+                //if this thread is waiting for a device
+                if (threadsWaitingDevices[i][j]==thread) {
+                    //remove thread from matrix
+                    threadsWaitingDevices[i][j]=NULL;
+                }
+            }
+        }
     }
     //if thread to delete is running
     if(thread == runningThread){
@@ -260,6 +273,7 @@ void thread_terminate(struct tcb_t* thread){
     //TODO: handle threads waiting for messages from this thread
     //remove the thread from the queue (no matter which one)
     list_del(&(thread->t_sched));
+    //TODO: remove from pseudoclock list
     //decrease the number of threads
     totalThread--;
     //free the thread
