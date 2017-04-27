@@ -33,11 +33,11 @@ static inline unsigned int do_io(devaddr device,  uintptr_t command, uintptr_t d
 }
 
 static void ttyprintstring(devaddr device, char *s) {
-    unsigned int* status;
+    uintptr_t status;
     //until the current char is not 0
     for (; *s; s++) {
-        status = (unsigned int*) do_terminal_io(device, DEV_TTRS_C_TRSMCHAR | (*s << 8));
-        switch (*(status) & 0x0F) {
+        status = do_terminal_io(device, DEV_TTRS_C_TRSMCHAR | (*s << 8));
+        switch (status & 0x0F) {
             case DEV_S_READY:
             case DEV_TTRS_S_CHARTRSM: break;
             default: return;

@@ -145,7 +145,7 @@ void standard_device_handler(int lineNumber){
     if (requestingThread!=NULL) {
         //wake up the requesting thread using a message
         //The thread is waiting from the ssi so it will pretend to be the ssi
-        do_send(SSI_addr, requestingThread, (uintptr_t) status);
+        do_send(SSI_addr, requestingThread, (uintptr_t) *status);
         //reset the element of the matrix
         threadsWaitingDevices[device][lineNumber] = NULL;
     }
