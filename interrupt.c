@@ -136,8 +136,8 @@ void standard_device_handler(int lineNumber){
         //get the status register
         status = (unsigned int*) DEV_REG_ADDR(lineNumber, device);
     }
-    //map the line number to matrix index
-    //The first three lines (IPI,CPUTIMER,TIMER) are unused in pending interrupt matrix
+    ////decrease line number by 3 to match compact matrix index
+    //The first three lines (IPI,CPUTIMER,TIMER) are not implemented in this version
     lineNumber -= 3;
     //get the i/o requesting thread from the data structure used to keep track of pending request
     struct tcb_t* requestingThread = threadsWaitingDevices[device][lineNumber];

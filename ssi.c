@@ -5,8 +5,6 @@
 #include "interrupt.h"
 #include "uARMconst.h"
 
-int do_io_ssi(struct tcb_t *sender, void *payload);
-
 void SSI_entry_point(){
     //forever (until killed)
     while(1){
@@ -156,7 +154,7 @@ void SSI_entry_point(){
         }
         //case: do IO and wait.
         else if(*service == DO_IO){
-            //TODO: handle.
+            //set I/O parameters into device memory area
             do_io_ssi(thread, payload);
         }
         //case: get process ID.
@@ -370,31 +368,40 @@ int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager){
     return result;
 }
 
-int getDeviceLineNumber(unsigned int address,unsigned int* lineNumber, unsigned int* deviceNumber) {
-    //devices registers start from address 64. Subtract it.
-    int signedAddress = address-64;
-    //first subtract all below lineNumber address and then all below deviceNumber address
-    //initialize lineNumber number to 0
-    *lineNumber=0;
-    //while the address minus 128 (space between two different lineNumber register) is >=0
-    while (signedAddress-128>=0) {
-        //increase lineNumber number
-        (*lineNumber)++;
-        //subtract 128
-        signedAddress-=128;
-    }
+int getDeviceLineNumber(unsigned int address, unsigned int* lineNumber, unsigned int* deviceNumber) {
+    //initialize lineNumber number to 3
+    *lineNumber = 3;
     //initialize deviceNumber number to 0
-    *deviceNumber=0;
-    //while the remaining address minus 16 (the space between two different lines address) is >=0
-    while (signedAddress-16>=0) {
-        //increase deviceNumber address
-        (*deviceNumber)++;
-        //subtract 16
-        signedAddress-=16;
+    *deviceNumber = 0;
+    //if the device is a disk, tape, network, printer or a terminal
+    if (address >= DEV_REG_ADDR(IL_DISK, 0)
+        && (address) <= DEV_REG_ADDR(IL_TERMINAL, 7) + TERM_WRITE_COMMAND) {
+        //devices registers start from address 64. Subtract it.
+        int signedAddress = address - DEV_REG_START;
+        //first subtract all below lineNumber address and then all below deviceNumber address
+        //address space for a line is the address space of a device multiplied by number of device per int line
+        const unsigned int lineSize = DEV_REG_SIZE * DEV_PER_INT;
+        //multiple subtraction algorithm
+        while (signedAddress >= lineSize) {
+            //increase line number value
+            (*lineNumber)++;
+            //subtract lineSize
+            signedAddress -= lineSize;
+        }
+        //multiple subtraction algorithm
+        while (signedAddress >= DEV_REG_SIZE) {
+            //increase device number value
+            (*deviceNumber)++;
+            //subtract device register size
+            signedAddress -= DEV_REG_SIZE;
+        }
+        //return correct exit code
+        return 0;
+    } else {
+        //IPI, CPUTIMER and TIMER are not implented in this version
+        //return an error code
+        return -1;
     }
-    //if signed address is not 0 the given address is not a lineNumber base address
-    //so return an error code
-    return 0;
 }
 
 int do_io_ssi(struct tcb_t *sender, void *payload) {
@@ -406,34 +413,57 @@ int do_io_ssi(struct tcb_t *sender, void *payload) {
         unsigned int* deviceAddress;
         //the requested command
         unsigned int command;
-    } *message = payload;
-    //declare a variable for the device base address, device number and line number
-    unsigned int baseAddress, deviceNumber, lineNumber;
+    }* message = payload;
+    //declare a variable for device number and line number
+    unsigned int deviceNumber, lineNumber;
     //get device and line number and save the function result
     int result = getDeviceLineNumber((unsigned int)message->deviceAddress, &lineNumber, &deviceNumber);
-    //if the requested device is a terminal
-    if ((message->deviceAddress) >= (memaddress*) DEV_REG_ADDR(IL_TERMINAL, 0)
-        && (message->deviceAddress) <= (memaddress*) DEV_REG_ADDR(IL_TERMINAL, 7) + TERM_WRITE_COMMAND) {
-
-    } else //the requested device is a disk, tape, network or a printer
-    {
-        //declare a pointer for get data1 info
-        unsigned int *data1;
-        //copy the value located 4 byte ahead of command area into a correspoind area of device memory register
-        *(message->deviceAddress+1) = *(&(message->command) + 1);
-        //if is an ethernet device
-        if (((message->deviceAddress) >= (memaddress *) DEV_REG_ADDR(IL_ETHERNET, 0) + GENERIC_COMMAND)
-            && (message->deviceAddress) <= (memaddress *) DEV_REG_ADDR(IL_ETHERNET, 7) + GENERIC_COMMAND) {
-            //copy the value located 8 byte ahead of command area into a correspoind area of device memory register
-            *(message->deviceAddress+2) = *(&(message->command) + 2);
+    //if getDeviceLineNumber is successful
+    if (result==0) {
+        //if the requested device is a disk, tape, network or a printer
+        if ((message->deviceAddress) >= (memaddress*) DEV_REG_ADDR(IL_DISK, 0)
+            && (message->deviceAddress) <= (memaddress*) DEV_REG_ADDR(IL_PRINTER, 7) + TERM_WRITE_COMMAND) {
+            struct {
+                //the requested ssi service
+                unsigned int service;
+                //the address of the device command area
+                unsigned int* deviceAddress;
+                //the requested command
+                unsigned int command;
+                //data 1 device parameter
+                unsigned int data1;
+            } * message = payload;
+            //copy data1 into a corresponding area located 4 byte ahead of command area of device memory register
+            *(message->deviceAddress + 1) = message->data1;
+            //if is an ethernet device
+            if (((message->deviceAddress) >= (memaddress*) DEV_REG_ADDR(IL_ETHERNET, 0) + GENERIC_COMMAND)
+                && (message->deviceAddress) <= (memaddress*) DEV_REG_ADDR(IL_ETHERNET, 7) + GENERIC_COMMAND) {
+                struct {
+                    //the requested ssi service
+                    unsigned int service;
+                    //the address of the device command area
+                    unsigned int* deviceAddress;
+                    //the requested command
+                    unsigned int command;
+                    //ethernet data1 parameter
+                    unsigned int data1;
+                    //ethernet data2 MAC address parameter
+                    unsigned int data2;
+                } * message = payload;
+                //copy data2 into a corresponding area located 8 byte ahead of command area of device memory register
+                *(message->deviceAddress + 2) = message->data2;
+            }
         }
+        //decrease line number by 3 to match compact matrix index
+        lineNumber -= 3;
+        //set pending request matrix with requesting thread
+        threadsWaitingDevices[deviceNumber][lineNumber] = sender;
+        //set command into the correct area of device memory register
+        //the device now will execute the request
+        *(message->deviceAddress) = message->command;
     }
-    threadsWaitingDevices[deviceNumber][lineNumber]=sender;
-    //set command into the correct area of device memory register
-    //the device now will execute the request
-    *(message->deviceAddress) = message->command;
-    //set the error number of sender thread to 0
-    sender->errno = 0;
+    //set the error number of sender thread
+    sender->errno = result;
 }
 
 void SSIRequest(unsigned int service, unsigned int payload, unsigned int* reply){

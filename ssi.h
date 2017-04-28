@@ -102,13 +102,21 @@ int set_PGM_manager(struct tcb_t* applicant, struct tcb_t* manager);
 void wait_for_clock(struct tcb_t* thread);
 
 /**
- * Get device number and interrupt line number given base address of a device memory register.
- * @param address unsigned int: base address
+ * Get device number and interrupt line number given an address of a device memory register.
+ * @param address unsigned int: device register address (STATUS of COMMAND doesn't matter)
  * @param lineNumber unsigned int*: a pointer to an area where the device number will be saved
  * @param deviceNumber unsigned int*: a pointer to an area where the line number will be saved
- * @return 1 if address is a correct base address, -1 otherwise
+ * @return 0 if address is correct address, -1 otherwise
  */
 int getDeviceLineNumber(unsigned int address,unsigned int* lineNumber, unsigned int* deviceNumber);
+
+/**
+ * Set I/O parameters into device memory area
+ * @param sender tcb_t*: the thread requesting I/O
+ * @param payload void*: pointer to ssi received message. Must contain I/O parameters.
+ * @return 0 if function execution is successful, -1 otherwise
+ */
+int do_io_ssi(struct tcb_t* sender, void* payload);
 
 /**
  * Returns the CPU execution time of the given process.
