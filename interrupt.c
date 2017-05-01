@@ -8,6 +8,19 @@
 #include "exception.h"
 #include "ssi.h"
 
+void init_interrupt_handler() {
+    //declare matrix iterators
+    int i,j;
+    //for each row
+    for (i = 0; i < 8; ++i) {
+        //for each column
+        for (j = 0; j < 5; ++j) {
+            //no thread is waiting for that device
+            threadsWaitingDevices[i][j]=NULL;
+        }
+    }
+}
+
 int get_highest_priority_interrupt(unsigned int* bitmap){
     //power of 2 bit mask
     unsigned int mask = 1;

@@ -35,6 +35,8 @@ int main(int argc, char** argv[]) {
     msgq_init();
     //initialize scheduler data structures
     sched_init();
+    //initialize interrupt handling
+    init_interrupt_handler();
     //set syscall/breakpoint handler
     setHandler(SYSBK_NEWAREA, (memaddress) sys_bk_handler);
     //set PGM trap handler

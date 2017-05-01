@@ -3,7 +3,16 @@
 
 #include "listx.h"
 
+/**
+ * Matrix for keep record of threads waiting for a device I/O.
+ * Rows are device number [0..7] and columns are interrupt line number (device type).
+ */
 struct tcb_t* threadsWaitingDevices[8][5];
+
+/**
+ * Initialize data structures used for interrupt handling.
+ */
+void init_interrupt_handler();
 
 /**
  * Returns the position of first least significant bit
@@ -12,6 +21,7 @@ struct tcb_t* threadsWaitingDevices[8][5];
  * @return int: the position of first LSB that equals 1, or -1 if the given bitmap is 0.
  */
 int get_highest_priority_interrupt(unsigned int* bitmap);
+
 /**
  * Interrupt handler routine.
  */
