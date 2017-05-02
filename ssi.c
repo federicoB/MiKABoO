@@ -171,6 +171,13 @@ void SSI_entry_point(){
             //Send a message with the process ID as payload
             MsgSend(thread, thread);
         }
+        //case: get parent process ID.
+        else if(*service == GET_PARENTPROCESSID){
+            //set errno as 0 (success)
+            thread->errno = 0;
+            //Send a message with the parent process ID as payload
+            MsgSend(thread, thread->t_pcb->p_parent);
+        }
         //default: error.
         else{
             //print an error messsage and panic

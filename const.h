@@ -100,6 +100,11 @@
 #define GET_THREADID 12
 
 /**
+ * Mnemonic SSI service code: get the parent process ID.
+ */
+#define GET_PARENTPROCESSID 13
+
+/**
  * MiKaBoO time slice in microseconds.
  */
 #define TIME_SLICE 5000
