@@ -39,6 +39,8 @@ struct tcb_t* thread_alloc(struct pcb_t* process){
         newTCB = extractTCB();
         //init message list in new pcb
         INIT_LIST_HEAD(&(newTCB->t_msgq));
+        //init sent message list in new pcb
+        INIT_LIST_HEAD(&(newTCB->t_sentmsg));
         //insert the new tcb in the thread list of the process
         list_add(&(newTCB->t_next), &(process->p_threads));
         //TODO: choose how to init t_next and t_sched ---------------------
