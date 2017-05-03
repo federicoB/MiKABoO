@@ -159,10 +159,15 @@ void SSI_entry_point(){
         }
         //case: get process ID.
         else if(*service == GET_PROCESSID){
+            struct {
+                uintptr_t reqtag;
+                //ssi service will answer the process of this thread
+                struct tcb_t* thread;
+            }* message = payload;
             //set errno as 0 (success)
             thread->errno = 0;
-            //Send a message with the process ID as payload
-            MsgSend(thread, thread->t_pcb);
+            //Send a message with the process ID of the given thread as payload
+            MsgSend(thread, message->thread->t_pcb);
         }
         //case: get thread ID.
         else if(*service == GET_THREADID){
@@ -173,10 +178,15 @@ void SSI_entry_point(){
         }
         //case: get parent process ID.
         else if(*service == GET_PARENTPROCESSID){
+            struct {
+                uintptr_t reqtag;
+                //ssi service will aswer the parent process of this process
+                struct pcb_t* process;
+            }* message = payload;
             //set errno as 0 (success)
             thread->errno = 0;
             //Send a message with the parent process ID as payload
-            MsgSend(thread, thread->t_pcb->p_parent);
+            MsgSend(thread, message->process->p_parent);
         }
         //default: error.
         else{

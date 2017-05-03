@@ -90,7 +90,7 @@
 #define DO_IO 10
 
 /**
- * Mnemonic SSI service code: get the process ID.
+ * Mnemonic SSI service code: get the process ID of a given thread.
  */
 #define GET_PROCESSID 11
 
@@ -100,7 +100,7 @@
 #define GET_THREADID 12
 
 /**
- * Mnemonic SSI service code: get the parent process ID.
+ * Mnemonic SSI service code: get the parent process ID of a given process.
  */
 #define GET_PARENTPROCESSID 13
 
