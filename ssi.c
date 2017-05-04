@@ -320,7 +320,7 @@ struct tcb_t* thread_create(struct pcb_t* process, state_t* state){
 
 void wait_for_clock(struct tcb_t* thread){
     //add the thread to the pseudoclock list
-    thread_enqueue(thread, &pseudoClockList);
+    list_add_tail(&(thread->t_pseudo),&pseudoClockList);
 }
 
 unsigned int get_CPU_time(struct pcb_t* applicant){
