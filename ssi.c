@@ -15,7 +15,8 @@ void SSI_entry_point(){
         void* payload;
 
         struct tcb_t* thread = MsgRecv(NULL, &payload);
-
+        //enter critical section
+        setSTATUS(STATUS_ALL_INT_DISABLE(getSTATUS()));
         unsigned int* service = payload;
         //case: get error number.
         if(*service == GET_ERRNO){
@@ -77,7 +78,7 @@ void SSI_entry_point(){
             proc_terminate(thread->t_pcb);
         }
         //case: terminate the thread
-        else if(*service == TERMINATE_THREAD){
+        else if(*service == TERMINATE_THREAD){        
             //if is the last thread of the process
             if(thread->t_pcb->p_threads.next == thread->t_pcb->p_threads.prev){
                 //terminate the whole process
@@ -89,6 +90,7 @@ void SSI_entry_point(){
                 thread_terminate(thread);
             }
         }
+        //case: set PGM manager.
         else if(*service == SETPGMMGR){
             //TODO: compress code, avoid copy-paste.
             struct {
@@ -194,6 +196,8 @@ void SSI_entry_point(){
             tprint("Invalid SSI service\n");
             PANIC();
         }
+        //exit critical section
+        setSTATUS(STATUS_ALL_INT_ENABLE(getSTATUS()));
     }
 }
 
@@ -259,6 +263,12 @@ void thread_terminate(struct tcb_t* thread){
                 }
             }
         }
+        //remove from pseudoclock list
+        //if the hook is not pinting to itself
+        if(!list_empty(&(thread->t_pseudo))){
+            //remove from the pseudoclock list
+            list_del(&(thread->t_pseudo));
+        }
     }
     //if thread to delete is running
     if(thread == runningThread){
@@ -288,7 +298,6 @@ void thread_terminate(struct tcb_t* thread){
     //TODO: handle threads waiting for messages from this thread
     //remove the thread from the queue (no matter which one)
     list_del(&(thread->t_sched));
-    //TODO: remove from pseudoclock list
     //decrease the number of threads
     totalThread--;
     //free the thread

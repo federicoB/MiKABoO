@@ -46,6 +46,8 @@ void scheduler(){
     SET_IT_US(MIN(tickTimeLeft, timeSliceLeft));
     //set current time as last load time
     lastLoadTime = TODLO;
+    //reset scheduling hook
+    INIT_LIST_HEAD(&(runningThread->t_sched));
     //load the running thread's state
     LDST(&(runningThread->t_s));
 }
@@ -90,6 +92,8 @@ unsigned int handle_pseudoclock(unsigned int TODLO){
             do_send(SSI_addr, thread, totalTicks);
             //remove the thread from pseudoclock waiting list
             list_del(&(thread->t_pseudo));
+            //reset hook
+            INIT_LIST_HEAD(&(thread->t_pseudo));
         }
     }
     //return the time

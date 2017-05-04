@@ -44,6 +44,8 @@ struct tcb_t* thread_alloc(struct pcb_t* process){
         //insert the new tcb in the thread list of the process
         list_add(&(newTCB->t_next), &(process->p_threads));
         //TODO: choose how to init t_next and t_sched ---------------------
+        //init hook status as "pointing to itself"
+        INIT_LIST_HEAD(&(newTCB->t_pseudo));
         //TODO: choose how to init status ecc...
         //save the parent process
         newTCB->t_pcb = process;

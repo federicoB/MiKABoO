@@ -14,6 +14,8 @@ void tlb_handler(){
     
     //copy the old state in the tcb
     memcopy((state_t*) TLB_OLDAREA, &(runningThread->t_s), sizeof(state_t));
+    //decrease the program counter by a word size. (due to the Link Return register behaviour)
+    runningThread->t_s.pc -= WORD_SIZE;
     //if the process (owner of the running thread) has a TLB trap manager set
     if(runningThread->t_pcb->tlbMgr != NULL){
         //save thread before passup
@@ -38,6 +40,8 @@ void pgm_trap_handler(){
     
     //copy the old state in the tcb
     memcopy((state_t*) PGMTRAP_OLDAREA, &(runningThread->t_s), sizeof(state_t));
+    //decrease the program counter by a word size. (due to the Link Return register behaviour)
+    runningThread->t_s.pc -= WORD_SIZE;
     //if the process (owner of the running thread) has a PGM trap manager set
     if(runningThread->t_pcb->pgmMgr != NULL){
         //save thread before passup
@@ -84,22 +88,14 @@ void sys_bk_handler(){
                     if(dst->t_pcb->pgmMgr == runningThread ||
                         dst->t_pcb->tlbMgr == runningThread ||
                         dst->t_pcb->sysMgr == runningThread){
-                        //if the message is TRAP_CONTINUE
-                        if(payload == TRAP_CONTINUE){
-                            //remove dst from the wait queue
-                            list_del(&(dst->t_sched));
-                            //decrease soft blocked threads number
-                            softBlockedThread--;
-                            //move thread to readyQueue
-                            thread_enqueue(dst, &readyQueue);
-                            //set dst status to ready
-                            dst->t_status = T_STATUS_READY;
-                        }
-                        //else if the message is a TRAP_TERMINATE
-                        else {
-                            //terminate the thread
-                            thread_terminate(dst);
-                        }
+                        //remove dst from the wait queue
+                        list_del(&(dst->t_sched));
+                        //decrease soft blocked threads number
+                        softBlockedThread--;
+                        //move thread to readyQueue
+                        thread_enqueue(dst, &readyQueue);
+                        //set dst status to ready
+                        dst->t_status = T_STATUS_READY;    
                     }
                     //else if a normal message
                     else{
@@ -141,14 +137,18 @@ void sys_bk_handler(){
             }
             //else if in user mode
             else{
+                //save the running thread before passup (side-effect)
+                struct tcb_t* accountThread = runningThread;
                 //set the cause as reserved instruction
                 runningThread->t_s.CP15_Cause = CAUSE_EXCCODE_SET(runningThread->t_s.CP15_Cause, EXC_RESERVEDINSTR);
                 //if there is PGM trap manager set
                 if(runningThread->t_pcb->pgmMgr != NULL){
+                    //decrease the program counter by a word size. (due to the Link Return register behaviour)
+                    runningThread->t_s.pc -= WORD_SIZE;
                     //pass up
                     trap_passup(runningThread->t_pcb->pgmMgr);
                     //handle accounting
-                    handle_accounting(runningThread);
+                    handle_accounting(accountThread);
                 }
                 //otherwise
                 else{
@@ -159,19 +159,23 @@ void sys_bk_handler(){
         }
         //foreign sys call
         else{
+            //save the running thread before passup (side-effect)
+            struct tcb_t* accountThread = runningThread;
             //if there is SYS/BK manager set
             if(runningThread->t_pcb->sysMgr != NULL){
                 //pass up
                 trap_passup(runningThread->t_pcb->sysMgr);
                 //handle accounting
-                handle_accounting(runningThread);
+                handle_accounting(accountThread);
             }
             //else if there is PGM trap manager set
             else if(runningThread->t_pcb->pgmMgr != NULL){
+                //decrease the program counter by a word size. (due to the Link Return register behaviour)
+                runningThread->t_s.pc -= WORD_SIZE;
                 //pass up
                 trap_passup(runningThread->t_pcb->pgmMgr);
                 //handle accounting
-                handle_accounting(runningThread);
+                handle_accounting(accountThread);
             }
             //otherwise
             else{
@@ -200,9 +204,9 @@ void sys_bk_handler(){
 }
 
 void trap_passup(struct tcb_t* manager){
-    //send a message to the manager with the cause as payload
+    //send a message to the manager with a pointer to the status as payload
     //and the offending thread as sender. Save the return value.
-    int succeeded = do_send(runningThread, manager, runningThread->t_s.CP15_Cause);
+    int succeeded = do_send(runningThread, manager,  (uintptr_t) &(runningThread->t_s));
     //if send succeeded
     if(succeeded == 0){
         //enqueue in wait queue

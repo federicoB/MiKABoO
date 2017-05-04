@@ -23,7 +23,9 @@ struct ssimsg_t{
 /**
  * tcb_t*: pointer to the SSI.
  */
-struct tcb_t* SSI_addr;
+struct tcb_t* SSI;
+
+#define SSI_addr SSI
 
 /**
  * System Service Interface entry point.
