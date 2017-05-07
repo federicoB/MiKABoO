@@ -122,5 +122,5 @@ void msg_free(struct msg_t* msg){
     //delete the message from the list of sent messages in tcb
     list_del(&(msg->m_tnext));
     //add the message to the message free list
-    list_add(&(msg->m_next), &freeMSG);
+    list_add_tail(&(msg->m_next), &freeMSG);
 }

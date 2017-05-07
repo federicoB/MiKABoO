@@ -78,7 +78,7 @@ int proc_delete(struct pcb_t* oldproc){
         //erase parent link (not necessary)
         oldproc->p_parent = NULL;
         //add oldproc to the free list
-        list_add(&(oldproc->p_siblings), &freePCB);
+        list_add_tail(&(oldproc->p_siblings), &freePCB);
         //set result as 0 (success)
         result = 0;
     }
