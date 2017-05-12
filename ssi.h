@@ -5,22 +5,6 @@
 #include "scheduler.h"
 
 /**
- * An SSI request message.
- */
-struct ssimsg_t{
-    
-    /**
-     * unsigned int: the requested service.
-     */
-    unsigned int service;
-    
-    /**
-     * unsigned int: the argument if needed.
-     */
-    unsigned int argument;
-};
-
-/**
  * tcb_t*: pointer to the SSI.
  */
 struct tcb_t* SSI;
@@ -31,14 +15,6 @@ struct tcb_t* SSI;
  * System Service Interface entry point.
  */
 void SSI_entry_point();
-
-/**
- * Sends an SSI request with the given information.
- * @param service unsigned int: SSI service mnemonic code.
- * @param payload unsigned int: argument for the service (if required).
- * @param reply unsigned int*: pointer to the area where the answer should be stored (if necessary).
- */
-void SSIRequest(unsigned int service, unsigned int payload, unsigned int* reply);
 
 /**
  * Terminates the given process and its whole process tree.

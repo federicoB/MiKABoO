@@ -507,18 +507,3 @@ int do_io_ssi(struct tcb_t *sender, void *payload) {
     //set the error number of sender thread
     sender->errno = result;
 }
-
-void SSIRequest(unsigned int service, unsigned int payload, unsigned int* reply){
-    //TODO: implement
-    
-    //declare a "fat" message
-    struct ssimsg_t ssimsg;
-    //set the service
-    ssimsg.service = service;
-    //set the argument
-    ssimsg.argument = payload;
-    //send a message to the SSI
-    MsgSend(SSI_addr, &ssimsg);
-    //receive a message from the SSI
-    MsgRecv(SSI_addr, reply);
-}
