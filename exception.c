@@ -107,29 +107,41 @@ void sys_bk_handler(){
                 else{
                     //get expected sender (or NULL if any message)
                     struct tcb_t* sender = (struct tcb_t*)(runningThread->t_s.a2);
-                    //get the payload pointer
-                    uintptr_t* payloadP = (uintptr_t*)(runningThread->t_s.a3);
-                    //get the message from the queue and save the result
-                    int succeeded = msgq_get(&sender, runningThread, payloadP);
-                    //if succeeded
-                    if(succeeded == 0){
-                        //save sender in a0
-                        runningThread->t_s.a1 = (unsigned int)sender;
+                    //if sender is anybody or the given sender is alive (not a reincarnation)
+                    if(sender == NULL || (sender->t_status != T_STATUS_NONE && runningThread->t_wait4sender != &t_dead)){
+                        //get the payload pointer
+                        uintptr_t* payloadP = (uintptr_t*)(runningThread->t_s.a3);
+                        //get the message from the queue and save the result
+                        int succeeded = msgq_get(&sender, runningThread, payloadP);
+                        //if succeeded
+                        if(succeeded == 0){
+                            //save sender in a0
+                            runningThread->t_s.a1 = (unsigned int)sender;
+                            //clear error number
+                            runningThread->errno = 0;
+                        }
+                        //otherwise (msg not found)
+                        else{
+                            //decrement stack pointer so recv will be called again.
+                            runningThread->t_s.pc -= WORD_SIZE;
+                            //increment soft blocked threads number
+                            softBlockedThread++;
+                            //move thread to waitQueue
+                            thread_enqueue(runningThread, &waitQueue);
+                            //set thread status to wait for message
+                            runningThread->t_status = T_STATUS_W4MSG;
+                            //set expected sender
+                            runningThread->t_wait4sender = sender;
+                            //set running thread to NULL
+                            runningThread = NULL;
+                        }
                     }
-                    //otherwise
+                    //else (sender is dead)
                     else{
-                        //decrement stack pointer so recv will be called again.
-                        runningThread->t_s.pc -= WORD_SIZE;
-                        //increment soft blocked threads number
-                        softBlockedThread++;
-                        //move thread to waitQueue
-                        thread_enqueue(runningThread, &waitQueue);
-                        //set thread status to wait for message
-                        runningThread->t_status = T_STATUS_W4MSG;
-                        //set expected sender
-                        runningThread->t_wait4sender = sender;
-                        //set running thread to NULL
-                        runningThread = NULL;
+                        //reset expected sender
+                        runningThread->t_wait4sender = NULL;
+                        //set error number
+                        runningThread->errno = 1;
                     }
                 }
                 //handle accounting

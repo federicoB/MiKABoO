@@ -244,6 +244,9 @@ struct pcb_t* proc_create(struct pcb_t* parent, state_t* state) {
     return process;
 }
 
+//extern tcbArray
+extern struct tcb_t tcbArray[];
+
 void thread_terminate(struct tcb_t* thread){
     //if in wait queue (not in ready and not unused)
     if(thread->t_status != T_STATUS_READY){
@@ -280,12 +283,7 @@ void thread_terminate(struct tcb_t* thread){
     //the message payload
     uintptr_t payload;
     //while there are pending messages
-    while((msgq_get(&sender, thread, &payload)) != -1){
-        //TODO: discard the message (send discard reply)
-        
-        //reset the sender as NULL
-        sender = NULL;
-    }
+    while((msgq_get(&sender, thread, &payload)) != -1) ;
     //handle not yet read messages with this thread as a sender
     //declare iterators
     struct msg_t* msg_it;
@@ -295,7 +293,25 @@ void thread_terminate(struct tcb_t* thread){
         //free the message
         msg_free(msg_it);
     }     
-    //TODO: handle threads waiting for messages from this thread
+    //handle threads waiting for messages from this thread
+    //declare an index
+    int i = 0;
+    //for the whole list of threads
+    for(i; i < MAXTHREAD ; i++){
+        //if thread is waiting from me 
+        if (tcbArray[i].t_status == T_STATUS_W4MSG && tcbArray[i].t_wait4sender == thread){
+            //sent expected sender to dead
+            tcbArray[i].t_wait4sender = &t_dead;
+            //remove dst from the wait queue
+            list_del(&(tcbArray[i].t_sched));
+            //decrease soft blocked threads number
+            softBlockedThread--;
+            //move thread to readyQueue
+            thread_enqueue(&(tcbArray[i]), &readyQueue);
+            //set dst status to ready
+            tcbArray[i].t_status = T_STATUS_READY;
+        }
+    }
     //remove the thread from the queue (no matter which one)
     list_del(&(thread->t_sched));
     //decrease the number of threads

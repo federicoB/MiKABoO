@@ -158,6 +158,11 @@ struct msg_t {
     struct list_head m_tnext;
 };
 
+/**
+ * struct tcb_t: fake tcb used to detect dead tcbs.
+ */
+struct tcb_t t_dead;
+
 //processes management functions
 
 /**
