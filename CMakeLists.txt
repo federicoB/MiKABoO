@@ -18,6 +18,8 @@ set(CMAKE_EXE_LINKER_FLAGS "-T ${uarmDir}/ldscripts/elf32ltsarm.h.uarmcore.x")
 set(CMAKE_BUILD_TYPE Debug)
 #enable including currect directory
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+#set executable output path as dist directory
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/dist")
 #include uarm directory
 include_directories(${uarmDir})
 
