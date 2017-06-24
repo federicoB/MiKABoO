@@ -95,6 +95,9 @@ struct tcb_t {
      */
     state_t t_s ;
 
+    /**
+     * int: thread status.
+     */
     int t_status;
 
     /**
@@ -126,7 +129,7 @@ struct tcb_t {
     struct list_head t_msgq;
     
     /**
-     * list_head: list of sent messages not "read" yet.
+     * list_head: entry point of the list of sent messages not "read" yet.
      */
     struct list_head t_sentmsg;
 };
@@ -232,14 +235,14 @@ int thread_free(struct tcb_t *oldthread);
 void thread_enqueue(struct tcb_t* new, struct list_head* queue);
 
 /**
- * Returns the head element of a scheduling queue.
+ * Returns the head element of a thread queue.
  * @param queue list_head*: queue entry point.
  * @return tcb_t*: a pointer to the head element or NULL if the queue is empty.
  */
 struct tcb_t* thread_qhead(struct list_head* queue);
 
 /**
- * Dequeue the first element of a scheduling queue.
+ * Dequeue the first element of a thread queue.
  * @param queue
  * @return tcb_t*: a pointer to the head element or NULL if the queue is empty.
  */

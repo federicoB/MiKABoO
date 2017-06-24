@@ -56,7 +56,7 @@ void int_handler(){
         handle_accounting(runningThread);
     }
     //NOTE: more than one line and more than one device may have raised an interrupt.
-    //Cause check is done in ascending priority order to handle the interrupt with highest priority first.
+    //Cause check is done in descending priority order to handle the interrupt with highest priority first.
     //Terminals have 2 sub-devices: a reader and a writer. The latter has higher priority.
     
     //get the cause
