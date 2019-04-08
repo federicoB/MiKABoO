@@ -1,8 +1,8 @@
 #include <libuarm.h>
 #include "scheduler.h"
-#include "const.h"
+#include "src/const.h"
 #include "utils.h"
-#include "exception.h"
+#include "src/exception.h"
 #include "ssi.h"
 
 void scheduler(){

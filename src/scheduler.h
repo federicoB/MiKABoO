@@ -1,7 +1,7 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include "mikabooq.h"
+#include "src/mikabooq.h"
 
 /**
  * list_head: ready threads queue.

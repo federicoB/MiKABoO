@@ -27,24 +27,24 @@ include_directories(${uarmDir})
 
 #declaring sources for data structured needed for both phase 1 and phase 2
 set(dataStructures
-        pcbImpl.c
-        tcbImpl.c
-        msgqImpl.c)
+        src/pcbImpl.c
+        src/tcbImpl.c
+        src/msgqImpl.c)
 #declaring phase 1 sources
 set(phase1Sources
-        p1test.c
+        src/p1test.c
         ${dataStructures}
         )
 #declaring phase 2 sources
 set(phase2Sources
-        init.c
+        src/init.c
         ${dataStructures}
-        scheduler.c
-        p2test.c
-        exception.c
-        interrupt.c
-        ssi.c
-        utils.c)
+        src/scheduler.c
+        src/p2test.c
+        src/exception.c
+        src/interrupt.c
+        src/ssi.c
+        src/utils.c)
 
 #declaring path for uarm libraries
 set(libuarm ${uarmDir}/libuarm.o)

@@ -1,7 +1,7 @@
 #ifndef SSI_H
 #define SSI_H
 
-#include "mikabooq.h"
+#include "src/mikabooq.h"
 #include "scheduler.h"
 
 /**

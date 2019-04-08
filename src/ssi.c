@@ -1,8 +1,8 @@
 #include <libuarm.h>
 #include "ssi.h"
-#include "const.h"
+#include "src/const.h"
 #include "utils.h"
-#include "interrupt.h"
+#include "src/interrupt.h"
 #include "uARMconst.h"
 
 void SSI_entry_point(){
